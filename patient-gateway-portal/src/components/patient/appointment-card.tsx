@@ -16,9 +16,11 @@ export function AppointmentCard({ appointment }: { appointment: Appointment }) {
   return (
     <Card className="rounded-2xl">
       <CardContent className="space-y-4 p-5">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">{appointment.doctorName}</p>
-          <Badge variant={statusVariant[appointment.status]}>{appointment.status}</Badge>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <p className="min-w-0 break-words text-sm font-semibold text-slate-900">{appointment.doctorName}</p>
+          <Badge className="shrink-0" variant={statusVariant[appointment.status]}>
+            {appointment.status}
+          </Badge>
         </div>
         <div className="grid gap-2 text-sm text-slate-600">
           <p className="flex items-center gap-2">

@@ -22,9 +22,11 @@ export function PrescriptionCard({
   return (
     <Card className="rounded-2xl">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{prescription.doctorName}</CardTitle>
-          <Badge variant={prescription.status === "Ready" ? "success" : "warning"}>{prescription.status}</Badge>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <CardTitle className="min-w-0 break-words text-base">{prescription.doctorName}</CardTitle>
+          <Badge className="shrink-0" variant={prescription.status === "Ready" ? "success" : "warning"}>
+            {prescription.status}
+          </Badge>
         </div>
         <p className="text-sm text-slate-600">
           {prescription.department} | {formatDate(prescription.visitDate)}
@@ -44,16 +46,16 @@ export function PrescriptionCard({
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => onView?.(prescription.id)} size="sm" variant="outline">
+        <div className="grid gap-2 sm:grid-cols-3">
+          <Button className="justify-start sm:justify-center" onClick={() => onView?.(prescription.id)} size="sm" variant="outline">
             <Eye className="h-4 w-4" />
             View
           </Button>
-          <Button onClick={() => onDownload?.(prescription.id)} size="sm" variant="outline">
+          <Button className="justify-start sm:justify-center" onClick={() => onDownload?.(prescription.id)} size="sm" variant="outline">
             <Download className="h-4 w-4" />
             Download PDF
           </Button>
-          <Button onClick={() => onShare?.(prescription.id)} size="sm" variant="ghost">
+          <Button className="justify-start sm:justify-center" onClick={() => onShare?.(prescription.id)} size="sm" variant="ghost">
             <Share2 className="h-4 w-4" />
             Share
           </Button>

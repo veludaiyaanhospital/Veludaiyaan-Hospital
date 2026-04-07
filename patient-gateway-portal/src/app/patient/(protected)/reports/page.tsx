@@ -57,7 +57,7 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-3">
+      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="reportType">Report Type</Label>
           <Select onValueChange={(value: "All" | Report["type"]) => setTypeFilter(value)} value={typeFilter}>
@@ -79,7 +79,7 @@ export default function ReportsPage() {
       </div>
 
       {filtered.length ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((report) => (
             <ReportCard
               key={report.id}

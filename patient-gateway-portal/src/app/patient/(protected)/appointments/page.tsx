@@ -28,7 +28,7 @@ export default function AppointmentsPage() {
   const past = appointments.filter((item) => ["Completed", "Cancelled"].includes(item.status));
 
   return (
-    <Tabs defaultValue="upcoming">
+    <Tabs className="space-y-3" defaultValue="upcoming">
       <TabsList>
         <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
         <TabsTrigger value="past">Past Visits</TabsTrigger>
@@ -37,7 +37,7 @@ export default function AppointmentsPage() {
 
       <TabsContent value="upcoming">
         {upcoming.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {upcoming.map((appointment) => (
               <AppointmentCard appointment={appointment} key={appointment.id} />
             ))}
@@ -52,7 +52,7 @@ export default function AppointmentsPage() {
 
       <TabsContent value="past">
         {past.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {past.map((appointment) => (
               <AppointmentCard appointment={appointment} key={appointment.id} />
             ))}
@@ -63,7 +63,7 @@ export default function AppointmentsPage() {
       </TabsContent>
 
       <TabsContent value="all">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {appointments.map((appointment) => (
             <AppointmentCard appointment={appointment} key={appointment.id} />
           ))}

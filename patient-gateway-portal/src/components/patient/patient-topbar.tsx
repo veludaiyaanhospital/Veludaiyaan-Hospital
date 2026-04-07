@@ -54,15 +54,15 @@ export function PatientTopbar({ title, subtitle }: PatientTopbarProps) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 lg:px-8">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 lg:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <Sheet>
             <SheetTrigger asChild>
-              <Button className="lg:hidden" size="icon" variant="outline">
+              <Button className="h-9 w-9 lg:hidden" size="icon" variant="outline">
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="w-[88%] max-w-xs overflow-y-auto pb-8">
               <SheetHeader>
                 <SheetTitle>{copy.appName}</SheetTitle>
               </SheetHeader>
@@ -87,33 +87,38 @@ export function PatientTopbar({ title, subtitle }: PatientTopbarProps) {
               </nav>
             </SheetContent>
           </Sheet>
-          <div>
-            <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
-            {subtitle ? <p className="text-xs text-slate-600">{subtitle}</p> : null}
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-semibold text-slate-900 sm:text-lg">{title}</h1>
+            {subtitle ? <p className="hidden text-xs text-slate-600 sm:block">{subtitle}</p> : null}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center justify-end gap-1 sm:w-auto sm:gap-2">
           <Button
+            className="h-9 gap-1 px-2 sm:px-3"
             onClick={() => patchSettings({ language: settings.language === "en" ? "ta" : "en" })}
             size="sm"
             variant="outline"
           >
             <Languages className="h-4 w-4" />
-            {settings.language === "en" ? "தமிழ்" : "English"}
+            <span className="hidden sm:inline">{settings.language === "en" ? "தமிழ்" : "English"}</span>
+            <span className="sr-only sm:hidden">Switch Language</span>
           </Button>
-          <Button onClick={toggleTheme} size="sm" variant="outline">
+          <Button className="h-9 gap-1 px-2 sm:px-3" onClick={toggleTheme} size="sm" variant="outline">
             {theme === "light" ? <MoonStar className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            {theme === "light" ? "Dark" : "Light"}
+            <span className="hidden sm:inline">{theme === "light" ? "Dark" : "Light"}</span>
+            <span className="sr-only sm:hidden">Toggle Theme</span>
           </Button>
           <Button
+            className="h-9 gap-1 px-2 sm:px-3"
             disabled={logoutMutation.isPending}
             onClick={() => logoutMutation.mutate()}
             size="sm"
             variant="ghost"
           >
             <LogOut className="h-4 w-4" />
-            {copy.logout}
+            <span className="hidden sm:inline">{copy.logout}</span>
+            <span className="sr-only sm:hidden">{copy.logout}</span>
           </Button>
         </div>
       </div>

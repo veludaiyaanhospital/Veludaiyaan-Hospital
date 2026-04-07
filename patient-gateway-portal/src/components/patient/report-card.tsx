@@ -27,7 +27,9 @@ export function ReportCard({ report, onView, onDownload }: ReportCardProps) {
             <p className="text-sm font-semibold text-slate-900">{report.testName}</p>
             <p className="text-xs text-slate-600">{report.type}</p>
           </div>
-          <Badge variant={statusVariant[report.status]}>{report.status}</Badge>
+          <Badge className="shrink-0" variant={statusVariant[report.status]}>
+            {report.status}
+          </Badge>
         </div>
 
         <div className="text-xs text-slate-600">
@@ -37,12 +39,12 @@ export function ReportCard({ report, onView, onDownload }: ReportCardProps) {
 
         <p className="text-sm text-slate-700">{report.previewSummary}</p>
 
-        <div className="flex gap-2">
-          <Button onClick={() => onView(report)} size="sm" variant="outline">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button className="justify-start sm:justify-center" onClick={() => onView(report)} size="sm" variant="outline">
             <Eye className="h-4 w-4" />
             View Report
           </Button>
-          <Button onClick={() => onDownload(report)} size="sm" variant="outline">
+          <Button className="justify-start sm:justify-center" onClick={() => onDownload(report)} size="sm" variant="outline">
             <Download className="h-4 w-4" />
             Download
           </Button>

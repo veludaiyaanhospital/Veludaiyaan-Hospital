@@ -59,11 +59,13 @@ export default function PatientProtectedLayout({
 
   return (
     <ProtectedRoute>
-      <div className="portal-shell min-h-screen lg:flex">
+      <div className="portal-shell min-h-screen overflow-x-clip lg:flex">
         <PatientSidebar patientName={patient ? `${patient.firstName} ${patient.lastName}` : undefined} />
-        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip">
           <PatientTopbar subtitle={pageMeta.subtitle} title={pageMeta.title} />
-          <main className="flex-1 p-4 pb-24 lg:p-8">{children}</main>
+          <main className="flex-1 px-3 py-4 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-8 lg:py-8 lg:pb-8">
+            {children}
+          </main>
         </div>
         <FloatingWhatsApp />
         <PatientMobileNav />

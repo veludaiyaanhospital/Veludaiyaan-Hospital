@@ -45,10 +45,10 @@ function SummaryCard({
       <Card className="rounded-2xl">
         <CardContent className="p-5">
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
-              <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
-              <p className="mt-1 text-xs text-slate-600">{caption}</p>
+              <p className="mt-2 break-words text-lg font-bold leading-tight text-slate-900 sm:text-2xl">{value}</p>
+              <p className="mt-1 break-words text-xs text-slate-600">{caption}</p>
             </div>
             <div className="rounded-xl bg-sky-50 p-2 text-sky-700">{icon}</div>
           </div>

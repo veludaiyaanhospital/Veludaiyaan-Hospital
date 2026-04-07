@@ -19,7 +19,7 @@ export function PatientMobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-2 py-2 shadow-[0_-6px_24px_rgba(15,23,42,0.06)] lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-6px_24px_rgba(15,23,42,0.06)] backdrop-blur lg:hidden">
       <ul className="grid grid-cols-5 gap-1">
         {compactItems.map((item) => {
           const Icon = item.icon;
@@ -29,13 +29,13 @@ export function PatientMobileNav() {
             <li key={item.href}>
               <Link
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold",
+                  "flex min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold",
                   isActive ? "bg-sky-600 text-white" : "text-slate-600",
                 )}
                 href={item.href}
               >
                 <Icon className="h-4 w-4" />
-                <span className="truncate">{compactLabel[item.labelKey] ?? item.labelKey}</span>
+                <span className="max-w-full truncate leading-none">{compactLabel[item.labelKey] ?? item.labelKey}</span>
               </Link>
             </li>
           );

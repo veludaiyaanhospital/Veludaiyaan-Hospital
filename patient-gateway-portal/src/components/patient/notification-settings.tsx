@@ -35,7 +35,7 @@ function ToggleRow({
 }) {
   return (
     <div className="flex items-start justify-between gap-3 py-2">
-      <div>
+      <div className="min-w-0 flex-1">
         <Label className="text-sm font-semibold text-slate-800" htmlFor={id}>
           {title}
         </Label>
@@ -62,7 +62,7 @@ export function NotificationSettings({ settings, onChange }: NotificationSetting
             onValueChange={(value: "en" | "ta") => onChange({ language: value })}
             value={settings.language}
           >
-            <SelectTrigger className="max-w-xs">
+            <SelectTrigger className="w-full sm:max-w-xs">
               <SelectValue placeholder="Select language" />
             </SelectTrigger>
             <SelectContent>
@@ -127,7 +127,7 @@ export function NotificationSettings({ settings, onChange }: NotificationSetting
             onValueChange={(value: "private" | "care-team-only") => onChange({ profileVisibility: value })}
             value={settings.profileVisibility}
           >
-            <SelectTrigger className="max-w-xs">
+            <SelectTrigger className="w-full sm:max-w-xs">
               <SelectValue placeholder="Select profile visibility" />
             </SelectTrigger>
             <SelectContent>
