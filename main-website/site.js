@@ -83,6 +83,8 @@ let translateInitPromise = null;
 let progressRaf = null;
 let appointmentChatbotUi = null;
 let appointmentTypingTimer = null;
+let hideFloatingBookingHint = () => {};
+let scheduleFloatingBookingHint = () => {};
 
 const APPOINTMENT_CHAT_CONFIG = {
   hospitalWhatsAppNumber: HOSPITAL_WHATSAPP_NUMBER,
@@ -253,6 +255,10 @@ function getAppointmentChatLanguage() {
 
 function getAppointmentChatCopy(lang = getAppointmentChatLanguage()) {
   return APPOINTMENT_CHAT_COPY[lang === "ta" ? "ta" : "en"];
+}
+
+function getFloatingBookingHintLabel() {
+  return currentLanguage === "ta" ? "அபாயின்மெண்ட் பதிவு" : "Book Appointment";
 }
 
 function getAppointmentDoctorById(doctorId) {
@@ -1231,10 +1237,12 @@ function closeAppointmentChatbot() {
   appointmentChatbotUi.backdrop.classList.remove("opacity-100", "pointer-events-auto");
   appointmentChatbotUi.panel.classList.add("opacity-0", "pointer-events-none", "translate-y-4", "scale-[0.98]");
   appointmentChatbotUi.panel.classList.remove("opacity-100", "pointer-events-auto", "translate-y-0", "scale-100");
+  scheduleFloatingBookingHint();
 }
 
 function openAppointmentChatbot() {
   ensureAppointmentChatbotUi();
+  hideFloatingBookingHint(true);
   appointmentChatState.isOpen = true;
   appointmentChatbotUi.root.classList.remove("pointer-events-none");
   appointmentChatbotUi.root.classList.add("pointer-events-auto");
@@ -1432,6 +1440,92 @@ function setupFloatingWhatsAppButton() {
 
   ensureAppointmentChatbotUi();
 
+  let hint = document.getElementById("appointment-floating-hint");
+  if (!hint) {
+    hint = document.createElement("div");
+    hint.id = "appointment-floating-hint";
+    hint.className =
+      "pointer-events-none fixed z-[56] flex max-w-[220px] items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-xl shadow-slate-900/15 opacity-0 translate-y-2 scale-95 transition-all duration-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
+    hint.innerHTML = `
+      <span data-floating-hint-label></span>
+      <span class="absolute -bottom-1 right-5 h-2.5 w-2.5 rotate-45 border-b border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"></span>
+    `;
+  }
+
+  if (hint.parentElement !== document.body) {
+    document.body.append(hint);
+  }
+
+  const hintLabel = hint.querySelector("[data-floating-hint-label]");
+  let idleTimer = null;
+  let hideTimer = null;
+
+  const clearIdleTimer = () => {
+    if (idleTimer !== null) {
+      window.clearTimeout(idleTimer);
+      idleTimer = null;
+    }
+  };
+
+  const clearHideTimer = () => {
+    if (hideTimer !== null) {
+      window.clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+  };
+
+  const getVisibleFloatingButton = () =>
+    floatingButtons.find((btn) => btn.classList.contains("inline-flex") && !btn.classList.contains("hidden"));
+
+  const canShowHint = () => {
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    return isDesktop && Boolean(getVisibleFloatingButton()) && !appointmentChatState.isOpen;
+  };
+
+  const hideHint = (immediate = false) => {
+    clearHideTimer();
+    hint.classList.add("opacity-0", "translate-y-2", "scale-95");
+    hint.classList.remove("opacity-100", "translate-y-0", "scale-100");
+    if (immediate) {
+      hint.classList.add("duration-0");
+      window.requestAnimationFrame(() => {
+        hint.classList.remove("duration-0");
+      });
+    }
+  };
+
+  const showHint = () => {
+    if (!canShowHint()) return;
+    if (hintLabel) {
+      hintLabel.textContent = getFloatingBookingHintLabel();
+    }
+
+    hint.classList.remove("opacity-0", "translate-y-2", "scale-95");
+    hint.classList.add("opacity-100", "translate-y-0", "scale-100");
+
+    clearHideTimer();
+    hideTimer = window.setTimeout(() => {
+      hideHint();
+    }, 3000);
+  };
+
+  const scheduleHint = () => {
+    clearIdleTimer();
+    if (!canShowHint()) return;
+    idleTimer = window.setTimeout(() => {
+      showHint();
+    }, 3000);
+  };
+
+  hideFloatingBookingHint = (immediate = false) => {
+    clearIdleTimer();
+    hideHint(immediate);
+  };
+
+  scheduleFloatingBookingHint = () => {
+    scheduleHint();
+  };
+
   const syncFloatingButton = () => {
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
 
@@ -1461,6 +1555,7 @@ function setupFloatingWhatsAppButton() {
         btn.dataset.appointmentLauncherBound = "true";
         btn.addEventListener("click", (event) => {
           event.preventDefault();
+          hideFloatingBookingHint(true);
           if (appointmentChatState.isOpen) {
             closeAppointmentChatbot();
             return;
@@ -1469,10 +1564,38 @@ function setupFloatingWhatsAppButton() {
         });
       }
     });
+
+    hint.style.right = "1.5rem";
+    hint.style.bottom = "5.6rem";
+
+    if (!isDesktop) {
+      hideFloatingBookingHint(true);
+      return;
+    }
+
+    scheduleHint();
   };
 
   syncFloatingButton();
   window.addEventListener("resize", syncFloatingButton);
+
+  const onScrollActivity = () => {
+    hideFloatingBookingHint();
+    scheduleHint();
+  };
+
+  const onPointerActivity = () => {
+    if (appointmentChatState.isOpen) return;
+    hideFloatingBookingHint();
+    scheduleHint();
+  };
+
+  window.addEventListener("scroll", onScrollActivity, { passive: true });
+  window.addEventListener("wheel", onScrollActivity, { passive: true });
+  window.addEventListener("touchmove", onScrollActivity, { passive: true });
+  window.addEventListener("mousemove", onPointerActivity, { passive: true });
+  window.addEventListener("touchstart", onPointerActivity, { passive: true });
+  window.addEventListener("keydown", onPointerActivity);
 }
 
 function setupScrollProgressBar() {
