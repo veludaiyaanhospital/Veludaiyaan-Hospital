@@ -7,6 +7,12 @@ export const metadata: Metadata = {
 };
 
 export default function PatientAuthLayout({ children }: { children: React.ReactNode }) {
+  const isGitHubPagesBuild =
+    process.env.GITHUB_PAGES === "true" || process.env.GITHUB_ACTIONS === "true";
+  const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] || "Veludaiyaan-Hospital";
+  const basePath = isGitHubPagesBuild ? `/${repositoryName}` : "";
+  const logoSrc = `${basePath}/hospital-logo.jpg`;
+
   return (
     <div className="portal-shell min-h-screen px-4 py-8">
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-2">
@@ -21,7 +27,7 @@ export default function PatientAuthLayout({ children }: { children: React.ReactN
               className="h-14 w-full object-contain object-left"
               height={112}
               priority
-              src="/hospital-logo.jpg"
+              src={logoSrc}
               width={640}
             />
           </div>
@@ -44,7 +50,7 @@ export default function PatientAuthLayout({ children }: { children: React.ReactN
               className="h-12 w-full object-contain object-center"
               height={96}
               priority
-              src="/hospital-logo.jpg"
+              src={logoSrc}
               width={560}
             />
           </div>
