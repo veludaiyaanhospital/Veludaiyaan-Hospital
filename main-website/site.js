@@ -1491,10 +1491,7 @@ function setupFloatingWhatsAppButton() {
   const getVisibleFloatingButton = () =>
     floatingButtons.find((btn) => btn.classList.contains("inline-flex") && !btn.classList.contains("hidden"));
 
-  const canShowHint = () => {
-    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-    return isDesktop && Boolean(getVisibleFloatingButton()) && !appointmentChatState.isOpen;
-  };
+  const canShowHint = () => Boolean(getVisibleFloatingButton()) && !appointmentChatState.isOpen;
 
   const hideHint = (immediate = false) => {
     clearHideTimer();
@@ -1600,13 +1597,9 @@ function setupFloatingWhatsAppButton() {
       }
     });
 
-    hint.style.right = "1.5rem";
-    hint.style.bottom = "5.6rem";
-
-    if (!isDesktop) {
-      hideFloatingBookingHint(true);
-      return;
-    }
+    hint.style.right = isMobile ? "1rem" : "1.5rem";
+    hint.style.bottom = isMobile ? "10rem" : "5.6rem";
+    hint.style.maxWidth = "min(220px, calc(100vw - 2rem))";
 
     scheduleHint();
   };
