@@ -74,7 +74,9 @@ export function PatientTopbar({ title, subtitle }: PatientTopbarProps) {
                     <Link
                       className={cn(
                         "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium",
-                        isActive ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100",
+                        isActive
+                          ? "bg-gradient-to-r from-[#0f4ca0] to-[#06b6d4] text-white"
+                          : "text-slate-700 hover:bg-slate-100",
                       )}
                       href={item.href}
                       key={item.href}

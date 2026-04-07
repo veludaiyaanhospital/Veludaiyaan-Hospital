@@ -188,7 +188,7 @@ function wirePatientGatewayLinks() {
 
   document.querySelectorAll("a[data-patient-gateway]").forEach((el) => {
     el.setAttribute("href", gatewayUrl);
-    el.setAttribute("title", "Open Patient Gateway Portal");
+    el.setAttribute("title", "Open Patient Portal");
   });
 }
 

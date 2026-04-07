@@ -30,7 +30,7 @@ export function PatientMobileNav() {
               <Link
                 className={cn(
                   "flex min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold",
-                  isActive ? "bg-sky-600 text-white" : "text-slate-600",
+                  isActive ? "bg-gradient-to-r from-[#0f4ca0] to-[#06b6d4] text-white" : "text-slate-600",
                 )}
                 href={item.href}
               >

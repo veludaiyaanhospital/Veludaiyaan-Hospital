@@ -23,7 +23,7 @@ export function PatientSidebar({ patientName }: PatientSidebarProps) {
     <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-white/95 px-5 py-6 lg:flex lg:flex-col">
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-sky-100 p-2 text-sky-700">
+          <div className="rounded-xl bg-[#dbeafe] p-2 text-[#0f4ca0]">
             <Hospital className="h-5 w-5" />
           </div>
           <div>
@@ -44,7 +44,7 @@ export function PatientSidebar({ patientName }: PatientSidebarProps) {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-sky-600 text-white shadow-sm"
+                  ? "bg-gradient-to-r from-[#0f4ca0] to-[#06b6d4] text-white shadow-sm"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
               )}
               href={item.href}

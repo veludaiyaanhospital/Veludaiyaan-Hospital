@@ -12,9 +12,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Veludaiyaan Hospital Patient Gateway",
+  title: "Veludaiyaan Hospital Patient Portal",
   description:
-    "Patient Gateway Portal for appointments, token status, prescriptions, reports, and support.",
+    "Patient Portal for appointments, token status, prescriptions, reports, and support.",
 };
 
 export default function RootLayout({

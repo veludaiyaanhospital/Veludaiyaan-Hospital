@@ -19,7 +19,7 @@ interface CopyDictionary {
 
 const copy: Record<Locale, CopyDictionary> = {
   en: {
-    appName: "Veludaiyaan Hospital Patient Gateway",
+    appName: "Veludaiyaan Hospital Patient Portal",
     dashboard: "Dashboard",
     tokenStatus: "Token Status",
     appointments: "Appointments",
@@ -35,7 +35,7 @@ const copy: Record<Locale, CopyDictionary> = {
     language: "Language",
   },
   ta: {
-    appName: "வேலுடையான் மருத்துவமனை நோயாளர் வாயில்",
+    appName: "வேலுடையான் மருத்துவமனை நோயாளர் போர்டல்",
     dashboard: "டாஷ்போர்டு",
     tokenStatus: "டோக்கன் நிலை",
     appointments: "நேரம்சேர்ப்பு",

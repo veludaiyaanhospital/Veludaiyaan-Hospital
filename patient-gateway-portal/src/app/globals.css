@@ -6,9 +6,9 @@
   --card: #ffffff;
   --muted: #64748b;
   --border: #dbe4ee;
-  --medical-blue: #0f6cbd;
-  --medical-teal: #0d9488;
-  --ring: #38bdf8;
+  --medical-blue: #0f68c7;
+  --medical-teal: #06b6d4;
+  --ring: #0f68c7;
 }
 
 .dark {
@@ -17,9 +17,9 @@
   --card: #0f172a;
   --muted: #94a3b8;
   --border: #334155;
-  --medical-blue: #38bdf8;
-  --medical-teal: #14b8a6;
-  --ring: #38bdf8;
+  --medical-blue: #60a5fa;
+  --medical-teal: #22d3ee;
+  --ring: #60a5fa;
 }
 
 @theme inline {
