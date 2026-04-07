@@ -275,6 +275,53 @@ function getFloatingBookingHintLabel() {
   return currentLanguage === "ta" ? "அபாயின்மெண்ட் பதிவு" : "Book Appointment";
 }
 
+function getLauncherChatBadgeLabel() {
+  return currentLanguage === "ta" ? "அரட்டை" : "CHAT";
+}
+
+function getResponsiveLauncherPlacement() {
+  const width = window.innerWidth;
+  const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+
+  if (width < 768) {
+    if (isPortrait) {
+      return {
+        button: { right: "1rem", bottom: "5.6rem" },
+        hint: { right: "1rem", bottom: "10rem" },
+        panel: { right: "0.75rem", left: "0.75rem", bottom: "10rem", maxHeight: "calc(100vh - 11rem)" }
+      };
+    }
+
+    return {
+      button: { right: "1rem", top: "1rem" },
+      hint: { right: "1rem", top: "5.1rem" },
+      panel: { right: "0.75rem", left: "0.75rem", top: "5.8rem", maxHeight: "calc(100vh - 6.8rem)" }
+    };
+  }
+
+  if (width < 1200) {
+    if (isPortrait) {
+      return {
+        button: { right: "1rem", top: "5.3rem" },
+        hint: { right: "1rem", top: "9.4rem" },
+        panel: { right: "1rem", top: "10.2rem", width: "380px", maxHeight: "calc(100vh - 11.2rem)" }
+      };
+    }
+
+    return {
+      button: { left: "1rem", top: "5.3rem" },
+      hint: { left: "1rem", top: "9.4rem" },
+      panel: { left: "1rem", top: "10.2rem", width: "380px", maxHeight: "calc(100vh - 11.2rem)" }
+    };
+  }
+
+  return {
+    button: { right: "1.5rem", bottom: "1.5rem" },
+    hint: { right: "1.5rem", bottom: "5.6rem" },
+    panel: { right: "1.5rem", bottom: "6rem", width: "380px", maxHeight: "calc(100vh - 7rem)" }
+  };
+}
+
 function getAppointmentDoctorById(doctorId) {
   return APPOINTMENT_CHAT_CONFIG.doctors.find((doctor) => doctor.id === doctorId) || null;
 }
@@ -1538,42 +1585,57 @@ function setupFloatingWhatsAppButton() {
   };
 
   const syncFloatingButton = () => {
-    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const placement = getResponsiveLauncherPlacement();
     const robotIconSrc = `${resolveSiteAssetPath(FLOATING_CHATBOT_ICON)}?v=20260408`;
 
     floatingButtons.forEach((btn) => {
       btn.style.position = "fixed";
-      btn.style.right = isMobile ? "1rem" : "1.5rem";
-      btn.style.bottom = isMobile ? "5.6rem" : "1.5rem";
+      btn.style.left = "auto";
+      btn.style.right = "auto";
+      btn.style.top = "auto";
+      btn.style.bottom = "auto";
+
+      if (placement.button.left) btn.style.left = placement.button.left;
+      if (placement.button.right) btn.style.right = placement.button.right;
+      if (placement.button.top) btn.style.top = placement.button.top;
+      if (placement.button.bottom) btn.style.bottom = placement.button.bottom;
+
       btn.style.zIndex = "55";
       btn.style.display = "inline-flex";
 
       btn.setAttribute("aria-label", "Book Appointment");
       btn.setAttribute("title", "Book Appointment");
       btn.setAttribute("href", "#");
-      btn.classList.add("overflow-hidden", "p-0", "ring-2", "ring-white/80", "dark:ring-slate-900/70");
+      btn.classList.add("overflow-visible", "p-0", "ring-2", "ring-white/80", "dark:ring-slate-900/70", "group");
       btn.classList.remove("bg-gradient-to-br", "from-emerald-500", "to-emerald-600", "text-white");
 
       if (btn.dataset.robotIconApplied !== "true") {
         btn.dataset.robotIconApplied = "true";
         btn.innerHTML = `
           <span class="sr-only">Book Appointment</span>
-          <img
-            src="${robotIconSrc}"
-            alt=""
-            data-robot-chat-icon
-            class="h-full w-full object-cover"
-            loading="eager"
-            decoding="async"
-            draggable="false"
-          />
+          <span class="relative block h-full w-full">
+            <img
+              src="${robotIconSrc}"
+              alt=""
+              data-robot-chat-icon
+              class="h-full w-full rounded-full object-cover"
+              loading="eager"
+              decoding="async"
+              draggable="false"
+            />
+            <span data-robot-chat-badge class="pointer-events-none absolute -left-6 top-1/2 -translate-y-1/2 rounded-full border border-slate-200 bg-white/95 px-2 py-0.5 text-[9px] font-black tracking-wide text-[#0f4ca0] shadow-md dark:border-slate-700 dark:bg-slate-900/95 dark:text-cyan-200">${escapeHtml(getLauncherChatBadgeLabel())}</span>
+          </span>
         `;
       }
 
       const robotImage = btn.querySelector("img[data-robot-chat-icon]");
       if (robotImage) {
         robotImage.setAttribute("src", robotIconSrc);
+      }
+
+      const badge = btn.querySelector("[data-robot-chat-badge]");
+      if (badge) {
+        badge.textContent = getLauncherChatBadgeLabel();
       }
 
       btn.classList.remove("hidden");
@@ -1597,9 +1659,30 @@ function setupFloatingWhatsAppButton() {
       }
     });
 
-    hint.style.right = isMobile ? "1rem" : "1.5rem";
-    hint.style.bottom = isMobile ? "10rem" : "5.6rem";
+    hint.style.left = "auto";
+    hint.style.right = "auto";
+    hint.style.top = "auto";
+    hint.style.bottom = "auto";
+    if (placement.hint.left) hint.style.left = placement.hint.left;
+    if (placement.hint.right) hint.style.right = placement.hint.right;
+    if (placement.hint.top) hint.style.top = placement.hint.top;
+    if (placement.hint.bottom) hint.style.bottom = placement.hint.bottom;
     hint.style.maxWidth = "min(220px, calc(100vw - 2rem))";
+
+    if (appointmentChatbotUi && appointmentChatbotUi.panel) {
+      const panel = appointmentChatbotUi.panel;
+      panel.style.left = "auto";
+      panel.style.right = "auto";
+      panel.style.top = "auto";
+      panel.style.bottom = "auto";
+      panel.style.width = placement.panel.width || "";
+      panel.style.maxHeight = placement.panel.maxHeight || "";
+
+      if (placement.panel.left) panel.style.left = placement.panel.left;
+      if (placement.panel.right) panel.style.right = placement.panel.right;
+      if (placement.panel.top) panel.style.top = placement.panel.top;
+      if (placement.panel.bottom) panel.style.bottom = placement.panel.bottom;
+    }
 
     scheduleHint();
   };
@@ -1781,6 +1864,10 @@ function updateLanguageToggleUi() {
   document.querySelectorAll("[data-lang-toggle]").forEach((btn) => {
     btn.setAttribute("aria-label", isTamil ? "Switch language to English" : "Switch language to Tamil");
     btn.setAttribute("title", isTamil ? "Switch to English" : "Switch to Tamil");
+  });
+
+  document.querySelectorAll("[data-robot-chat-badge]").forEach((badge) => {
+    badge.textContent = getLauncherChatBadgeLabel();
   });
 }
 
