@@ -11,7 +11,7 @@ export default function PatientAuthLayout({ children }: { children: React.ReactN
     process.env.GITHUB_PAGES === "true" || process.env.GITHUB_ACTIONS === "true";
   const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] || "Veludaiyaan-Hospital";
   const basePath = isGitHubPagesBuild ? `/${repositoryName}` : "";
-  const logoSrc = `${basePath}/hospital-logo.jpg`;
+  const logoSrc = `${basePath}/LOGO.png`;
 
   return (
     <div className="portal-shell min-h-screen px-4 py-8">

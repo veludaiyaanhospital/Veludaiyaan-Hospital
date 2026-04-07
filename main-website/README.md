@@ -12,7 +12,7 @@ This folder contains the public hospital website pages.
 - `contact.html`
 - `site.js`
 - `hero.jpg`
-- `logo.jpg`
+- `LOGO.png`
 - `logo1.jpg`
 
 ## Open locally
