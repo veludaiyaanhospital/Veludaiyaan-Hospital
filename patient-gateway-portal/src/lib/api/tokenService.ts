@@ -6,9 +6,9 @@ import { withMockLatency } from "./client";
 let mutableTokenStatus: TokenStatus = structuredClone(mockTokenStatus);
 
 function stageFromPosition(position: number): TokenStage {
-  if (position <= 0) return "Completed";
-  if (position === 1) return "Called";
-  return "Waiting";
+  if (position <= 0) return "Seen";
+  if (position <= 2) return "Waiting";
+  return "Visit";
 }
 
 export const tokenService = {
@@ -17,25 +17,36 @@ export const tokenService = {
       await withMockLatency(() => {
         const movement = Math.random() > 0.55 ? 1 : 0;
         const nextPosition = Math.max(0, mutableTokenStatus.queuePosition - movement);
-        const isConsultation = nextPosition === 0 && Math.random() > 0.6;
-
         mutableTokenStatus = {
           ...mutableTokenStatus,
           queuePosition: nextPosition,
           patientsAhead: Math.max(0, nextPosition - 1),
           estimatedWaitMinutes: nextPosition === 0 ? 0 : nextPosition * 6,
           isNext: nextPosition === 1,
-          status: isConsultation ? "In Consultation" : stageFromPosition(nextPosition),
+          status: stageFromPosition(nextPosition),
           updatedAt: new Date().toISOString(),
         };
 
-        if (mutableTokenStatus.status === "Completed") {
-          mutableTokenStatus.timeline = mutableTokenStatus.timeline.map((item) => ({
+        const stageOrder: TokenStage[] = ["Visit", "Waiting", "Seen"];
+        const currentStageIndex = stageOrder.indexOf(mutableTokenStatus.status);
+        const nowLabel = new Date().toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+
+        mutableTokenStatus.timeline = mutableTokenStatus.timeline.map((item) => {
+          const itemIndex = stageOrder.indexOf(item.stage);
+          const isCurrent = itemIndex === currentStageIndex;
+          const isCompleted = itemIndex < currentStageIndex || mutableTokenStatus.status === "Seen";
+
+          return {
             ...item,
-            completed: true,
-            current: item.stage === "Completed",
-          }));
-        }
+            completed: isCompleted,
+            current: isCurrent,
+            timestamp: isCurrent && !item.timestamp ? nowLabel : item.timestamp,
+          };
+        });
 
         return structuredClone(mutableTokenStatus);
       }, { delayMs: 650 })

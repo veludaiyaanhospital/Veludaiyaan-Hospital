@@ -5,11 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/utils";
 import type { Appointment } from "@/lib/types";
 
-const statusVariant: Record<Appointment["status"], "default" | "secondary" | "success" | "danger"> = {
-  Booked: "default",
-  "Checked In": "secondary",
-  Completed: "success",
-  Cancelled: "danger",
+const statusVariant: Record<Appointment["status"], "default" | "warning" | "success"> = {
+  Visit: "default",
+  Waiting: "warning",
+  Seen: "success",
 };
 
 export function AppointmentCard({ appointment }: { appointment: Appointment }) {

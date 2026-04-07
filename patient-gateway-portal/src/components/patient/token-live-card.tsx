@@ -8,11 +8,10 @@ import { Switch } from "@/components/ui/switch";
 import { formatDateTime } from "@/lib/utils";
 import type { TokenStatus } from "@/lib/types";
 
-const statusVariantMap: Record<TokenStatus["status"], "warning" | "default" | "secondary" | "success"> = {
+const statusVariantMap: Record<TokenStatus["status"], "warning" | "default" | "success"> = {
+  Visit: "default",
   Waiting: "warning",
-  Called: "default",
-  "In Consultation": "secondary",
-  Completed: "success",
+  Seen: "success",
 };
 
 interface TokenLiveCardProps {

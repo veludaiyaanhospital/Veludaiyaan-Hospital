@@ -16,7 +16,7 @@ export interface Patient {
   avatarUrl?: string;
 }
 
-export type TokenStage = "Waiting" | "Called" | "In Consultation" | "Completed";
+export type TokenStage = "Visit" | "Waiting" | "Seen";
 
 export interface TokenTimelineStep {
   label: string;
@@ -45,7 +45,7 @@ export interface Appointment {
   department: string;
   type: "New" | "Follow-up" | "Review";
   mode: "In Person" | "Video";
-  status: "Booked" | "Checked In" | "Completed" | "Cancelled";
+  status: "Visit" | "Waiting" | "Seen";
   notes?: string;
   room?: string;
 }

@@ -65,7 +65,10 @@ export function PatientSummaryCards({
   prescriptions,
   reports,
 }: PatientSummaryCardsProps) {
-  const nextAppointment = appointments.find((item) => item.status === "Booked") ?? appointments[0];
+  const nextAppointment =
+    appointments.find((item) => item.status === "Visit") ??
+    appointments.find((item) => item.status === "Waiting") ??
+    appointments[0];
   const latestPrescription = prescriptions[0];
   const readyReports = reports.filter((item) => item.status !== "Processing").length;
 

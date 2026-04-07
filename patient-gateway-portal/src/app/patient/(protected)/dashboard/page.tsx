@@ -79,7 +79,10 @@ export default function DashboardPage() {
 
   const latestPrescription = prescriptions[0];
   const reportsReady = reports.filter((report) => report.status !== "Processing");
-  const nextAppointment = appointments.find((appointment) => appointment.status === "Booked") ?? appointments[0];
+  const nextAppointment =
+    appointments.find((appointment) => appointment.status === "Visit") ??
+    appointments.find((appointment) => appointment.status === "Waiting") ??
+    appointments[0];
 
   return (
     <div className="space-y-6">
@@ -233,7 +236,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <EmptyState title="No visit history" description="Completed visits will appear here" />
+            <EmptyState title="No visit history" description="Seen visits will appear here" />
           )}
         </CardContent>
       </Card>

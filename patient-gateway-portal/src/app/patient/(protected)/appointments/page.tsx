@@ -24,8 +24,8 @@ export default function AppointmentsPage() {
   }
 
   const appointments = appointmentsQuery.data;
-  const upcoming = appointments.filter((item) => ["Booked", "Checked In"].includes(item.status));
-  const past = appointments.filter((item) => ["Completed", "Cancelled"].includes(item.status));
+  const upcoming = appointments.filter((item) => ["Visit", "Waiting"].includes(item.status));
+  const past = appointments.filter((item) => item.status === "Seen");
 
   return (
     <Tabs className="space-y-3" defaultValue="upcoming">
@@ -58,7 +58,7 @@ export default function AppointmentsPage() {
             ))}
           </div>
         ) : (
-          <EmptyState description="Completed visits will appear here" title="No past appointments" />
+          <EmptyState description="Seen visits will appear here" title="No past appointments" />
         )}
       </TabsContent>
 

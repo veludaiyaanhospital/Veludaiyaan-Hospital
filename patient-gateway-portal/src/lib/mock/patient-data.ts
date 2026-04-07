@@ -38,11 +38,9 @@ export const mockTokenStatus: TokenStatus = {
   updatedAt: "2026-04-07T09:42:00.000Z",
   isNext: false,
   timeline: [
-    { label: "Token Generated", stage: "Waiting", timestamp: "09:10", completed: true, current: false },
-    { label: "Waiting Area", stage: "Waiting", timestamp: "09:14", completed: true, current: true },
-    { label: "Called to Room", stage: "Called", completed: false, current: false },
-    { label: "Consultation", stage: "In Consultation", completed: false, current: false },
-    { label: "Completed", stage: "Completed", completed: false, current: false },
+    { label: "Visit (Appointment Booked)", stage: "Visit", timestamp: "09:10", completed: true, current: false },
+    { label: "Waiting", stage: "Waiting", timestamp: "09:14", completed: true, current: true },
+    { label: "Seen", stage: "Seen", completed: false, current: false },
   ],
 };
 
@@ -54,7 +52,7 @@ export const mockAppointments: Appointment[] = [
     department: "Orthopaedics",
     type: "Follow-up",
     mode: "In Person",
-    status: "Checked In",
+    status: "Waiting",
     notes: "Post ORIF tibial plateau review",
   },
   {
@@ -64,7 +62,7 @@ export const mockAppointments: Appointment[] = [
     department: "Hand & Microvascular",
     type: "Review",
     mode: "In Person",
-    status: "Booked",
+    status: "Visit",
     notes: "Suture and wound healing assessment",
   },
   {
@@ -74,7 +72,7 @@ export const mockAppointments: Appointment[] = [
     department: "Pain Medicine",
     type: "Follow-up",
     mode: "Video",
-    status: "Completed",
+    status: "Seen",
     notes: "Pain medication taper guidance",
   },
 ];
