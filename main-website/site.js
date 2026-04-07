@@ -1529,12 +1529,14 @@ function setupFloatingWhatsAppButton() {
 
   const syncFloatingButton = () => {
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
     floatingButtons.forEach((btn) => {
       btn.style.position = "fixed";
-      btn.style.right = "1.5rem";
-      btn.style.bottom = "1.5rem";
+      btn.style.right = isMobile ? "1rem" : "1.5rem";
+      btn.style.bottom = isMobile ? "5.6rem" : "1.5rem";
       btn.style.zIndex = "55";
+      btn.style.display = "inline-flex";
 
       btn.setAttribute("aria-label", "Book Appointment");
       btn.setAttribute("title", "Book Appointment");
@@ -1557,13 +1559,8 @@ function setupFloatingWhatsAppButton() {
         `;
       }
 
-      if (isDesktop) {
-        btn.classList.remove("hidden");
-        btn.classList.add("inline-flex");
-      } else {
-        btn.classList.add("hidden");
-        btn.classList.remove("inline-flex");
-      }
+      btn.classList.remove("hidden");
+      btn.classList.add("inline-flex");
 
       if (btn.parentElement !== document.body) {
         document.body.append(btn);
