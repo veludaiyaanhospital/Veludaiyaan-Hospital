@@ -1,4 +1,5 @@
-const WHATSAPP_BASE = "https://wa.me/917845927606?text=";
+const HOSPITAL_WHATSAPP_NUMBER = "917845927606";
+const WHATSAPP_BASE = `https://wa.me/${HOSPITAL_WHATSAPP_NUMBER}?text=`;
 const WHATSAPP_MESSAGE =
   "Hello Veludaiyaan Hospital, I would like to book an appointment.\n\nName:\nAge:\nProblem:\nPreferred Date:";
 
@@ -80,9 +81,399 @@ let currentTheme = "light";
 let currentLanguage = "en";
 let translateInitPromise = null;
 let progressRaf = null;
+let appointmentChatbotUi = null;
+let appointmentTypingTimer = null;
+
+const APPOINTMENT_CHAT_CONFIG = {
+  hospitalWhatsAppNumber: HOSPITAL_WHATSAPP_NUMBER,
+  resetAfterSuccessfulHandoff: false,
+  doctors: [
+    { id: "dr-senthil-s", en: "Dr. Senthil S", ta: "டாக்டர் செந்தில் எஸ்" },
+    { id: "dr-anbarasan-k", en: "Dr. Anbarasan K", ta: "டாக்டர் அன்பரசன் கே" },
+    { id: "dr-rajesh-m", en: "Dr. Rajesh M", ta: "டாக்டர் ராஜேஷ் எம்" },
+    { id: "dr-jayakar", en: "Dr. Jayakar", ta: "டாக்டர் ஜெயக்கர்" },
+    { id: "dr-rajini-s", en: "Dr. Rajini S", ta: "டாக்டர் ராஜினி எஸ்" },
+    { id: "dr-nishanth-s", en: "Dr. Nishanth S", ta: "டாக்டர் நிஷாந்த் எஸ்" }
+  ],
+  timeSlots: [
+    { id: "morning", en: "9:00 AM - 3:00 PM", ta: "காலை 9:00 - மதியம் 3:00" },
+    { id: "evening", en: "5:30 PM - 9:30 PM", ta: "மாலை 5:30 - இரவு 9:30" }
+  ]
+};
+
+const APPOINTMENT_CHAT_COPY = {
+  en: {
+    hospitalName: "Veludaiyaan Ortho & Trauma Specialty Hospital",
+    assistantTitle: "Appointment Booking Assistant",
+    welcome:
+      "Welcome to Veludaiyaan Ortho & Trauma Specialty Hospital. I will help you book your appointment in a few quick steps.",
+    chooseLanguage: "Please choose your language",
+    chooseLanguageSecondary: "தயவுசெய்து உங்கள் மொழியை தேர்வு செய்யவும்",
+    languageEnglish: "English",
+    languageTamil: "தமிழ்",
+    askName: "What is your name?",
+    askMobile: "What is your mobile number?",
+    askDoctor: "Which doctor would you like to consult?",
+    askReason: "What is the reason for your visit?",
+    askDate: "Which date would you prefer?",
+    askTiming: "Which timing do you prefer?",
+    confirmPrompt: "Please confirm your appointment request details",
+    nameLabel: "Patient Name",
+    phoneLabel: "Phone",
+    doctorLabel: "Preferred Doctor",
+    reasonLabel: "Reason for Visit",
+    dateLabel: "Preferred Date",
+    timingLabel: "Preferred OP Timing",
+    languageLabel: "Language",
+    languageValue: "English",
+    languageChoiceLabel: "Language",
+    selectDoctorPlaceholder: "Select doctor",
+    namePlaceholder: "Enter patient name",
+    mobilePlaceholder: "Enter 10-digit mobile",
+    reasonPlaceholder: "Type complaint / symptoms",
+    datePlaceholder: "Select preferred date",
+    continueButton: "Continue",
+    backButton: "Back",
+    restartButton: "Restart booking",
+    closeButton: "Close",
+    sendWhatsApp: "Send via WhatsApp",
+    preparing: "Preparing WhatsApp...",
+    success: "Opening WhatsApp with your appointment message...",
+    fallbackText:
+      "If WhatsApp did not open automatically, use the options below.",
+    openWhatsApp: "Open WhatsApp",
+    callHospital: "Call Hospital",
+    directWhatsApp: "WhatsApp directly",
+    typing: "Typing...",
+    invalidName: "Please enter patient name.",
+    invalidMobileRequired: "Please enter mobile number.",
+    invalidMobile: "Enter a valid Indian 10-digit mobile number.",
+    invalidDoctor: "Please choose a doctor.",
+    invalidReason: "Please enter reason for visit.",
+    invalidDateRequired: "Please choose preferred date.",
+    invalidDatePast: "Preferred date cannot be in the past.",
+    invalidTiming: "Please choose OP timing.",
+    bookingSummaryTitle: "Appointment Request",
+    confirmAvailability: "Please confirm appointment availability."
+  },
+  ta: {
+    hospitalName: "வேலுடையான் ஆர்த்தோ & டிராமா ஸ்பெஷாலிட்டி ஹாஸ்பிட்டல்",
+    assistantTitle: "அபாயின்மெண்ட் பதிவு உதவியாளர்",
+    welcome:
+      "வேலுடையான் ஆர்த்தோ & டிராமா ஸ்பெஷாலிட்டி ஹாஸ்பிட்டலுக்கு வரவேற்கிறோம். சில எளிய படிகளில் அபாயின்மெண்ட் பதிவு செய்ய உதவுகிறேன்.",
+    chooseLanguage: "உங்கள் மொழியை தேர்வு செய்யவும்",
+    chooseLanguageSecondary: "Please choose your language",
+    languageEnglish: "English",
+    languageTamil: "தமிழ்",
+    askName: "உங்கள் பெயர் என்ன?",
+    askMobile: "உங்கள் மொபைல் எண் என்ன?",
+    askDoctor: "நீங்கள் எந்த மருத்துவரை பார்க்க விரும்புகிறீர்கள்?",
+    askReason: "நீங்கள் வருவதற்கான காரணம் என்ன?",
+    askDate: "எந்த தேதியை விரும்புகிறீர்கள்?",
+    askTiming: "எந்த நேரத்தை விரும்புகிறீர்கள்?",
+    confirmPrompt: "உங்கள் அபாயின்மெண்ட் விவரங்களை உறுதிப்படுத்தவும்",
+    nameLabel: "நோயாளர் பெயர்",
+    phoneLabel: "தொலைபேசி",
+    doctorLabel: "விரும்பும் மருத்துவர்",
+    reasonLabel: "வருகை காரணம்",
+    dateLabel: "விரும்பும் தேதி",
+    timingLabel: "விரும்பும் ஓபி நேரம்",
+    languageLabel: "மொழி",
+    languageValue: "தமிழ்",
+    languageChoiceLabel: "மொழி",
+    selectDoctorPlaceholder: "மருத்துவரை தேர்வு செய்யவும்",
+    namePlaceholder: "நோயாளர் பெயரை உள்ளிடவும்",
+    mobilePlaceholder: "10 இலக்க மொபைல் எண்ணை உள்ளிடவும்",
+    reasonPlaceholder: "பிரச்சனை / அறிகுறிகளை உள்ளிடவும்",
+    datePlaceholder: "விரும்பும் தேதியை தேர்வு செய்யவும்",
+    continueButton: "தொடரவும்",
+    backButton: "பின்னுக்கு",
+    restartButton: "மீண்டும் பதிவு செய்",
+    closeButton: "மூடு",
+    sendWhatsApp: "WhatsApp மூலம் அனுப்பு",
+    preparing: "WhatsApp திறக்க தயாராகிறது...",
+    success: "உங்கள் அபாயின்மெண்ட் செய்தியுடன் WhatsApp திறக்கப்படுகிறது...",
+    fallbackText:
+      "WhatsApp தானாக திறக்காவிட்டால் கீழேயுள்ள விருப்பங்களை பயன்படுத்தவும்.",
+    openWhatsApp: "WhatsApp திறக்கவும்",
+    callHospital: "மருத்துவமனைக்கு அழைக்கவும்",
+    directWhatsApp: "நேரடி WhatsApp",
+    typing: "தட்டச்சு செய்கிறது...",
+    invalidName: "நோயாளர் பெயரை உள்ளிடவும்.",
+    invalidMobileRequired: "மொபைல் எண்ணை உள்ளிடவும்.",
+    invalidMobile: "சரியான 10 இலக்க இந்திய மொபைல் எண்ணை உள்ளிடவும்.",
+    invalidDoctor: "மருத்துவரை தேர்வு செய்யவும்.",
+    invalidReason: "வருகை காரணத்தை உள்ளிடவும்.",
+    invalidDateRequired: "விரும்பும் தேதியை தேர்வு செய்யவும்.",
+    invalidDatePast: "கடந்த தேதியை தேர்வு செய்ய முடியாது.",
+    invalidTiming: "ஓபி நேரத்தை தேர்வு செய்யவும்.",
+    bookingSummaryTitle: "அபாயின்மெண்ட் கோரிக்கை",
+    confirmAvailability: "அபாயின்மெண்ட் கிடைப்பதை உறுதிப்படுத்தவும்."
+  }
+};
+
+const APPOINTMENT_CHAT_STEP_KEYS = ["language", "name", "mobile", "doctor", "reason", "date", "timing", "confirm"];
+
+const appointmentChatState = {
+  isOpen: false,
+  language: null,
+  step: 0,
+  typing: false,
+  error: "",
+  isSubmitting: false,
+  handoffFailed: false,
+  handoffSuccess: false,
+  lastAttemptLink: "",
+  answers: {
+    name: "",
+    mobile: "",
+    doctorId: "",
+    reason: "",
+    preferredDate: "",
+    timingId: ""
+  }
+};
 
 function normalizeText(text) {
   return (text || "").replace(/\s+/g, " ").trim();
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function getAppointmentChatLanguage() {
+  return appointmentChatState.language === "ta" ? "ta" : "en";
+}
+
+function getAppointmentChatCopy(lang = getAppointmentChatLanguage()) {
+  return APPOINTMENT_CHAT_COPY[lang === "ta" ? "ta" : "en"];
+}
+
+function getAppointmentDoctorById(doctorId) {
+  return APPOINTMENT_CHAT_CONFIG.doctors.find((doctor) => doctor.id === doctorId) || null;
+}
+
+function getAppointmentTimingById(timingId) {
+  return APPOINTMENT_CHAT_CONFIG.timeSlots.find((slot) => slot.id === timingId) || null;
+}
+
+function formatAppointmentDate(dateValue, lang = getAppointmentChatLanguage()) {
+  if (!dateValue) return "";
+
+  const parsed = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateValue;
+
+  try {
+    return new Intl.DateTimeFormat(lang === "ta" ? "ta-IN" : "en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }).format(parsed);
+  } catch (_) {
+    return dateValue;
+  }
+}
+
+function getAppointmentStepQuestion(step, copy) {
+  switch (APPOINTMENT_CHAT_STEP_KEYS[step]) {
+    case "name":
+      return copy.askName;
+    case "mobile":
+      return copy.askMobile;
+    case "doctor":
+      return copy.askDoctor;
+    case "reason":
+      return copy.askReason;
+    case "date":
+      return copy.askDate;
+    case "timing":
+      return copy.askTiming;
+    case "confirm":
+      return copy.confirmPrompt;
+    default:
+      return copy.chooseLanguage;
+  }
+}
+
+function getAppointmentStepAnswer(step, lang = getAppointmentChatLanguage()) {
+  const copy = getAppointmentChatCopy(lang);
+  const { answers } = appointmentChatState;
+
+  switch (APPOINTMENT_CHAT_STEP_KEYS[step]) {
+    case "language":
+      return copy.languageValue;
+    case "name":
+      return answers.name;
+    case "mobile":
+      return answers.mobile ? `+91 ${answers.mobile}` : "";
+    case "doctor": {
+      const doctor = getAppointmentDoctorById(answers.doctorId);
+      return doctor ? doctor[lang] : "";
+    }
+    case "reason":
+      return answers.reason;
+    case "date":
+      return formatAppointmentDate(answers.preferredDate, lang);
+    case "timing": {
+      const slot = getAppointmentTimingById(answers.timingId);
+      return slot ? slot[lang] : "";
+    }
+    default:
+      return "";
+  }
+}
+
+function buildAppointmentWhatsAppMessage(lang, answers) {
+  const language = lang === "ta" ? "ta" : "en";
+  const doctor = getAppointmentDoctorById(answers.doctorId);
+  const timing = getAppointmentTimingById(answers.timingId);
+  const doctorLabel = doctor ? doctor[language] : answers.doctorId;
+  const timingLabel = timing ? timing[language] : answers.timingId;
+  const dateLabel = formatAppointmentDate(answers.preferredDate, language);
+
+  if (language === "ta") {
+    return [
+      "அபாயின்மெண்ட் கோரிக்கை",
+      "",
+      `நோயாளர் பெயர்: ${answers.name}`,
+      `தொலைபேசி: ${answers.mobile}`,
+      `விரும்பும் மருத்துவர்: ${doctorLabel}`,
+      `வருகை காரணம்: ${answers.reason}`,
+      `விரும்பும் தேதி: ${dateLabel}`,
+      `விரும்பும் ஓபி நேரம்: ${timingLabel}`,
+      "மொழி: தமிழ்",
+      "",
+      "அபாயின்மெண்ட் கிடைப்பதை உறுதிப்படுத்தவும்."
+    ].join("\n");
+  }
+
+  return [
+    "Appointment Request",
+    "",
+    `Patient Name: ${answers.name}`,
+    `Phone: ${answers.mobile}`,
+    `Preferred Doctor: ${doctorLabel}`,
+    `Reason for Visit: ${answers.reason}`,
+    `Preferred Date: ${dateLabel}`,
+    `Preferred OP Timing: ${timingLabel}`,
+    "Language: English",
+    "",
+    "Please confirm appointment availability."
+  ].join("\n");
+}
+
+function buildAppointmentWhatsAppUrl(message) {
+  return `https://wa.me/${APPOINTMENT_CHAT_CONFIG.hospitalWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+}
+
+function validateAppointmentStep(step, copy, payload = {}) {
+  const key = APPOINTMENT_CHAT_STEP_KEYS[step];
+  const rawValue = payload.value ?? "";
+  const normalized = normalizeText(rawValue);
+
+  if (key === "name") {
+    if (!normalized) return { valid: false, error: copy.invalidName };
+    return { valid: true, value: normalized };
+  }
+
+  if (key === "mobile") {
+    const digits = String(rawValue || "").replace(/\D/g, "");
+    if (!digits) return { valid: false, error: copy.invalidMobileRequired };
+    if (!/^[6-9]\d{9}$/.test(digits)) return { valid: false, error: copy.invalidMobile };
+    return { valid: true, value: digits };
+  }
+
+  if (key === "doctor") {
+    if (!normalized || !getAppointmentDoctorById(normalized)) {
+      return { valid: false, error: copy.invalidDoctor };
+    }
+    return { valid: true, value: normalized };
+  }
+
+  if (key === "reason") {
+    if (!normalized) return { valid: false, error: copy.invalidReason };
+    return { valid: true, value: normalized };
+  }
+
+  if (key === "date") {
+    if (!normalized) return { valid: false, error: copy.invalidDateRequired };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(`${normalized}T00:00:00`);
+
+    if (Number.isNaN(selectedDate.getTime()) || selectedDate < today) {
+      return { valid: false, error: copy.invalidDatePast };
+    }
+
+    return { valid: true, value: normalized };
+  }
+
+  if (key === "timing") {
+    if (!normalized || !getAppointmentTimingById(normalized)) {
+      return { valid: false, error: copy.invalidTiming };
+    }
+    return { valid: true, value: normalized };
+  }
+
+  return { valid: true, value: normalized };
+}
+
+function clearAppointmentTypingTimer() {
+  if (appointmentTypingTimer !== null) {
+    window.clearTimeout(appointmentTypingTimer);
+    appointmentTypingTimer = null;
+  }
+}
+
+function setAppointmentChatStep(nextStep, withTyping = true) {
+  appointmentChatState.step = Math.max(0, Math.min(nextStep, APPOINTMENT_CHAT_STEP_KEYS.length - 1));
+  appointmentChatState.error = "";
+  appointmentChatState.handoffFailed = false;
+  appointmentChatState.handoffSuccess = false;
+
+  clearAppointmentTypingTimer();
+
+  if (withTyping && appointmentChatState.step > 0) {
+    appointmentChatState.typing = true;
+    renderAppointmentChatbot();
+    appointmentTypingTimer = window.setTimeout(() => {
+      appointmentChatState.typing = false;
+      renderAppointmentChatbot();
+      focusAppointmentChatInput();
+    }, 280);
+    return;
+  }
+
+  appointmentChatState.typing = false;
+  renderAppointmentChatbot();
+  focusAppointmentChatInput();
+}
+
+function resetAppointmentChatState() {
+  clearAppointmentTypingTimer();
+  appointmentChatState.language = null;
+  appointmentChatState.step = 0;
+  appointmentChatState.typing = false;
+  appointmentChatState.error = "";
+  appointmentChatState.isSubmitting = false;
+  appointmentChatState.handoffFailed = false;
+  appointmentChatState.handoffSuccess = false;
+  appointmentChatState.lastAttemptLink = "";
+  appointmentChatState.answers = {
+    name: "",
+    mobile: "",
+    doctorId: "",
+    reason: "",
+    preferredDate: "",
+    timingId: ""
+  };
 }
 
 function buildIcon(type, sizeClass = "h-4 w-4") {
@@ -537,9 +928,509 @@ function setupAmbientAnimations() {
   }
 }
 
+function ensureAppointmentChatbotStyles() {
+  if (document.getElementById("appointment-chatbot-style")) return;
+
+  const style = document.createElement("style");
+  style.id = "appointment-chatbot-style";
+  style.textContent = `
+    .appointment-chat-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .appointment-chat-scroll::-webkit-scrollbar-thumb {
+      background: rgba(14, 116, 144, 0.28);
+      border-radius: 999px;
+    }
+    .appointment-bubble-rise {
+      animation: appointmentBubbleRise 220ms ease-out;
+      transform-origin: left bottom;
+    }
+    .appointment-typing-dot {
+      width: 0.35rem;
+      height: 0.35rem;
+      border-radius: 999px;
+      background: rgba(15, 76, 160, 0.68);
+      animation: appointmentTypingPulse 1000ms infinite ease-in-out;
+    }
+    .appointment-typing-dot:nth-child(2) {
+      animation-delay: 120ms;
+    }
+    .appointment-typing-dot:nth-child(3) {
+      animation-delay: 240ms;
+    }
+    @keyframes appointmentBubbleRise {
+      0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    @keyframes appointmentTypingPulse {
+      0%, 80%, 100% {
+        transform: scale(0.75);
+        opacity: 0.45;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  `;
+
+  document.head.append(style);
+}
+
+function getAppointmentTodayInputValue() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getAppointmentSummaryHtml(copy, lang) {
+  const doctor = getAppointmentDoctorById(appointmentChatState.answers.doctorId);
+  const timing = getAppointmentTimingById(appointmentChatState.answers.timingId);
+  const doctorText = doctor ? doctor[lang] : "";
+  const timingText = timing ? timing[lang] : "";
+  const dateText = formatAppointmentDate(appointmentChatState.answers.preferredDate, lang);
+
+  return `
+    <div class="mt-3 rounded-2xl border border-sky-100 bg-sky-50/75 p-3 text-xs text-slate-700 shadow-sm">
+      <p class="text-xs font-extrabold uppercase tracking-wide text-[#0f4ca0]">${escapeHtml(copy.bookingSummaryTitle)}</p>
+      <dl class="mt-2 grid gap-2">
+        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.nameLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(appointmentChatState.answers.name)}</dd></div>
+        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.phoneLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(appointmentChatState.answers.mobile)}</dd></div>
+        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.doctorLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(doctorText)}</dd></div>
+        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.reasonLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(appointmentChatState.answers.reason)}</dd></div>
+        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.dateLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(dateText)}</dd></div>
+        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.timingLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(timingText)}</dd></div>
+        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.languageLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(copy.languageValue)}</dd></div>
+      </dl>
+    </div>
+  `;
+}
+
+function getAppointmentConversationMarkup(copy, lang) {
+  const sections = [];
+
+  const botBubble = (content, extraClass = "") =>
+    `<div class="max-w-[88%] rounded-2xl rounded-tl-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm appointment-bubble-rise ${extraClass}">${content}</div>`;
+
+  const userBubble = (content) =>
+    `<div class="ml-auto max-w-[88%] rounded-2xl rounded-tr-md bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2 text-sm font-semibold text-white shadow-sm appointment-bubble-rise">${content}</div>`;
+
+  const typingBubble = `
+    <div class="inline-flex max-w-[88%] items-center gap-1.5 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-3 py-2 shadow-sm appointment-bubble-rise">
+      <span class="appointment-typing-dot"></span>
+      <span class="appointment-typing-dot"></span>
+      <span class="appointment-typing-dot"></span>
+      <span class="ml-1 text-xs font-semibold text-slate-500">${escapeHtml(copy.typing)}</span>
+    </div>
+  `;
+
+  sections.push(botBubble(escapeHtml(copy.welcome)));
+  sections.push(botBubble(`${escapeHtml(copy.chooseLanguage)}<br><span class="text-xs text-slate-500">${escapeHtml(copy.chooseLanguageSecondary)}</span>`));
+
+  if (appointmentChatState.language) {
+    sections.push(userBubble(escapeHtml(copy.languageValue)));
+  }
+
+  for (let step = 1; step <= 6; step += 1) {
+    if (appointmentChatState.step > step) {
+      sections.push(botBubble(escapeHtml(getAppointmentStepQuestion(step, copy))));
+      sections.push(userBubble(escapeHtml(getAppointmentStepAnswer(step, lang))));
+      continue;
+    }
+
+    if (appointmentChatState.step === step) {
+      sections.push(appointmentChatState.typing ? typingBubble : botBubble(escapeHtml(getAppointmentStepQuestion(step, copy))));
+      break;
+    }
+  }
+
+  if (appointmentChatState.step === 7) {
+    sections.push(appointmentChatState.typing ? typingBubble : botBubble(escapeHtml(copy.confirmPrompt)));
+    if (!appointmentChatState.typing) {
+      sections.push(getAppointmentSummaryHtml(copy, lang));
+    }
+  }
+
+  return sections.join("");
+}
+
+function getAppointmentComposerMarkup(copy, lang) {
+  const stepKey = APPOINTMENT_CHAT_STEP_KEYS[appointmentChatState.step];
+  const errorHtml = appointmentChatState.error
+    ? `<p class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">${escapeHtml(appointmentChatState.error)}</p>`
+    : "";
+
+  const navActions =
+    appointmentChatState.step > 0
+      ? `
+        <div class="mt-2 flex items-center justify-between gap-2">
+          <button type="button" data-appointment-back class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 ${appointmentChatState.isSubmitting ? "cursor-not-allowed opacity-60" : ""}" ${appointmentChatState.isSubmitting ? "disabled" : ""}>${escapeHtml(copy.backButton)}</button>
+          <button type="button" data-appointment-restart class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 ${appointmentChatState.isSubmitting ? "cursor-not-allowed opacity-60" : ""}" ${appointmentChatState.isSubmitting ? "disabled" : ""}>${escapeHtml(copy.restartButton)}</button>
+        </div>
+      `
+      : "";
+
+  if (stepKey === "language") {
+    return `
+      <div class="grid gap-2">
+        <button type="button" data-appointment-language="en" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow">${escapeHtml(APPOINTMENT_CHAT_COPY.en.languageEnglish)}</button>
+        <button type="button" data-appointment-language="ta" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-100">${escapeHtml(APPOINTMENT_CHAT_COPY.ta.languageTamil)}</button>
+      </div>
+      ${navActions}
+    `;
+  }
+
+  if (stepKey === "confirm") {
+    const message = buildAppointmentWhatsAppMessage(lang, appointmentChatState.answers);
+    const finalLink = buildAppointmentWhatsAppUrl(message);
+    const fallbackLink = appointmentChatState.lastAttemptLink || finalLink;
+    const statusText = appointmentChatState.isSubmitting
+      ? `<p class="rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-700">${escapeHtml(copy.preparing)}</p>`
+      : appointmentChatState.handoffSuccess
+        ? `<p class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">${escapeHtml(copy.success)}</p>`
+        : "";
+
+    const fallbackText = appointmentChatState.handoffFailed
+      ? `
+        <p class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">${escapeHtml(copy.fallbackText)}</p>
+        <a href="${escapeHtml(fallbackLink)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">${escapeHtml(copy.openWhatsApp)}</a>
+      `
+      : "";
+
+    return `
+      <div class="grid gap-2">
+        ${statusText}
+        <button type="button" data-appointment-send class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-emerald-500 px-3 py-2.5 text-sm font-bold text-white shadow ${appointmentChatState.isSubmitting ? "cursor-not-allowed opacity-70" : "hover:brightness-105"}" ${appointmentChatState.isSubmitting ? "disabled" : ""}>${escapeHtml(copy.sendWhatsApp)}</button>
+        <div class="grid grid-cols-2 gap-2">
+          <a href="${escapeHtml(EMERGENCY_TEL)}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">${escapeHtml(copy.callHospital)}</a>
+          <a href="https://wa.me/${escapeHtml(APPOINTMENT_CHAT_CONFIG.hospitalWhatsAppNumber)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">${escapeHtml(copy.directWhatsApp)}</a>
+        </div>
+        ${fallbackText}
+      </div>
+      ${navActions}
+    `;
+  }
+
+  if (stepKey === "doctor") {
+    const doctorOptions = APPOINTMENT_CHAT_CONFIG.doctors
+      .map((doctor) => `<option value="${escapeHtml(doctor.id)}" ${appointmentChatState.answers.doctorId === doctor.id ? "selected" : ""}>${escapeHtml(doctor[lang])}</option>`)
+      .join("");
+
+    return `
+      <form data-appointment-form class="grid gap-2">
+        ${errorHtml}
+        <select name="doctor" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f68c7]/35">
+          <option value="">${escapeHtml(copy.selectDoctorPlaceholder)}</option>
+          ${doctorOptions}
+        </select>
+        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow hover:brightness-105">${escapeHtml(copy.continueButton)}</button>
+      </form>
+      ${navActions}
+    `;
+  }
+
+  if (stepKey === "timing") {
+    const timingOptions = APPOINTMENT_CHAT_CONFIG.timeSlots
+      .map((slot) => `<option value="${escapeHtml(slot.id)}" ${appointmentChatState.answers.timingId === slot.id ? "selected" : ""}>${escapeHtml(slot[lang])}</option>`)
+      .join("");
+
+    return `
+      <form data-appointment-form class="grid gap-2">
+        ${errorHtml}
+        <select name="timing" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f68c7]/35">
+          <option value="">${escapeHtml(copy.timingLabel)}</option>
+          ${timingOptions}
+        </select>
+        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow hover:brightness-105">${escapeHtml(copy.continueButton)}</button>
+      </form>
+      ${navActions}
+    `;
+  }
+
+  if (stepKey === "date") {
+    return `
+      <form data-appointment-form class="grid gap-2">
+        ${errorHtml}
+        <input data-appointment-input type="date" name="preferredDate" min="${escapeHtml(getAppointmentTodayInputValue())}" value="${escapeHtml(appointmentChatState.answers.preferredDate)}" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f68c7]/35" />
+        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow hover:brightness-105">${escapeHtml(copy.continueButton)}</button>
+      </form>
+      ${navActions}
+    `;
+  }
+
+  if (stepKey === "reason") {
+    return `
+      <form data-appointment-form class="grid gap-2">
+        ${errorHtml}
+        <textarea data-appointment-input name="reason" rows="3" placeholder="${escapeHtml(copy.reasonPlaceholder)}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f68c7]/35">${escapeHtml(appointmentChatState.answers.reason)}</textarea>
+        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow hover:brightness-105">${escapeHtml(copy.continueButton)}</button>
+      </form>
+      ${navActions}
+    `;
+  }
+
+  if (stepKey === "mobile") {
+    return `
+      <form data-appointment-form class="grid gap-2">
+        ${errorHtml}
+        <input data-appointment-input type="tel" name="mobile" inputmode="numeric" maxlength="10" placeholder="${escapeHtml(copy.mobilePlaceholder)}" value="${escapeHtml(appointmentChatState.answers.mobile)}" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f68c7]/35" />
+        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow hover:brightness-105">${escapeHtml(copy.continueButton)}</button>
+      </form>
+      ${navActions}
+    `;
+  }
+
+  return `
+    <form data-appointment-form class="grid gap-2">
+      ${errorHtml}
+      <input data-appointment-input type="text" name="name" autocomplete="name" placeholder="${escapeHtml(copy.namePlaceholder)}" value="${escapeHtml(appointmentChatState.answers.name)}" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f68c7]/35" />
+      <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow hover:brightness-105">${escapeHtml(copy.continueButton)}</button>
+    </form>
+    ${navActions}
+  `;
+}
+
+function focusAppointmentChatInput() {
+  if (!appointmentChatbotUi || !appointmentChatState.isOpen) return;
+  const input = appointmentChatbotUi.controls.querySelector("[data-appointment-input]");
+  if (!input || typeof input.focus !== "function") return;
+  window.requestAnimationFrame(() => input.focus());
+}
+
+function renderAppointmentChatbot() {
+  if (!appointmentChatbotUi) return;
+
+  const lang = getAppointmentChatLanguage();
+  const copy = getAppointmentChatCopy(lang);
+  appointmentChatbotUi.hospitalName.textContent = copy.hospitalName;
+  appointmentChatbotUi.title.textContent = copy.assistantTitle;
+  appointmentChatbotUi.stream.innerHTML = getAppointmentConversationMarkup(copy, lang);
+  appointmentChatbotUi.controls.innerHTML = getAppointmentComposerMarkup(copy, lang);
+  bindAppointmentChatbotControls();
+
+  window.requestAnimationFrame(() => {
+    appointmentChatbotUi.stream.scrollTop = appointmentChatbotUi.stream.scrollHeight;
+  });
+}
+
+function closeAppointmentChatbot() {
+  if (!appointmentChatbotUi) return;
+  appointmentChatState.isOpen = false;
+  clearAppointmentTypingTimer();
+  appointmentChatbotUi.root.classList.add("pointer-events-none");
+  appointmentChatbotUi.root.classList.remove("pointer-events-auto");
+  appointmentChatbotUi.backdrop.classList.add("opacity-0", "pointer-events-none");
+  appointmentChatbotUi.backdrop.classList.remove("opacity-100", "pointer-events-auto");
+  appointmentChatbotUi.panel.classList.add("opacity-0", "pointer-events-none", "translate-y-4", "scale-[0.98]");
+  appointmentChatbotUi.panel.classList.remove("opacity-100", "pointer-events-auto", "translate-y-0", "scale-100");
+}
+
+function openAppointmentChatbot() {
+  ensureAppointmentChatbotUi();
+  appointmentChatState.isOpen = true;
+  appointmentChatbotUi.root.classList.remove("pointer-events-none");
+  appointmentChatbotUi.root.classList.add("pointer-events-auto");
+  appointmentChatbotUi.backdrop.classList.remove("opacity-0", "pointer-events-none");
+  appointmentChatbotUi.backdrop.classList.add("opacity-100", "pointer-events-auto");
+  appointmentChatbotUi.panel.classList.remove("opacity-0", "pointer-events-none", "translate-y-4", "scale-[0.98]");
+  appointmentChatbotUi.panel.classList.add("opacity-100", "pointer-events-auto", "translate-y-0", "scale-100");
+  renderAppointmentChatbot();
+  focusAppointmentChatInput();
+}
+
+function bindAppointmentChatbotControls() {
+  if (!appointmentChatbotUi) return;
+
+  appointmentChatbotUi.controls.querySelectorAll("[data-appointment-language]").forEach((button) => {
+    if (button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      appointmentChatState.language = button.dataset.appointmentLanguage === "ta" ? "ta" : "en";
+      setAppointmentChatStep(1, true);
+    });
+  });
+
+  appointmentChatbotUi.controls.querySelectorAll("[data-appointment-restart]").forEach((button) => {
+    if (button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      resetAppointmentChatState();
+      renderAppointmentChatbot();
+    });
+  });
+
+  appointmentChatbotUi.controls.querySelectorAll("[data-appointment-back]").forEach((button) => {
+    if (button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      if (appointmentChatState.isSubmitting || appointmentChatState.step <= 0) return;
+      setAppointmentChatStep(appointmentChatState.step - 1, false);
+    });
+  });
+
+  const sendButton = appointmentChatbotUi.controls.querySelector("[data-appointment-send]");
+  if (sendButton && sendButton.dataset.bound !== "true") {
+    sendButton.dataset.bound = "true";
+    sendButton.addEventListener("click", () => {
+      if (appointmentChatState.isSubmitting) return;
+      const lang = getAppointmentChatLanguage();
+      const message = buildAppointmentWhatsAppMessage(lang, appointmentChatState.answers);
+      const targetLink = buildAppointmentWhatsAppUrl(message);
+      appointmentChatState.lastAttemptLink = targetLink;
+      appointmentChatState.error = "";
+      appointmentChatState.handoffFailed = false;
+      appointmentChatState.handoffSuccess = false;
+      appointmentChatState.isSubmitting = true;
+      renderAppointmentChatbot();
+
+      window.setTimeout(() => {
+        let popup = null;
+        try {
+          popup = window.open(targetLink, "_blank", "noopener,noreferrer");
+        } catch (_) {
+          popup = null;
+        }
+
+        appointmentChatState.isSubmitting = false;
+        appointmentChatState.handoffSuccess = Boolean(popup);
+        appointmentChatState.handoffFailed = !popup;
+        renderAppointmentChatbot();
+
+        if (popup && APPOINTMENT_CHAT_CONFIG.resetAfterSuccessfulHandoff) {
+          window.setTimeout(() => {
+            resetAppointmentChatState();
+            renderAppointmentChatbot();
+          }, 650);
+        }
+      }, 340);
+    });
+  }
+
+  const form = appointmentChatbotUi.controls.querySelector("[data-appointment-form]");
+  if (form && form.dataset.bound !== "true") {
+    form.dataset.bound = "true";
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (appointmentChatState.isSubmitting) return;
+
+      const copy = getAppointmentChatCopy();
+      const formData = new FormData(form);
+      const stepKey = APPOINTMENT_CHAT_STEP_KEYS[appointmentChatState.step];
+      const rawValueMap = {
+        name: formData.get("name") || "",
+        mobile: formData.get("mobile") || "",
+        doctor: formData.get("doctor") || "",
+        reason: formData.get("reason") || "",
+        date: formData.get("preferredDate") || "",
+        timing: formData.get("timing") || ""
+      };
+
+      const result = validateAppointmentStep(
+        appointmentChatState.step,
+        copy,
+        { value: rawValueMap[stepKey] || "" }
+      );
+
+      if (!result.valid) {
+        appointmentChatState.error = result.error || "";
+        appointmentChatState.handoffFailed = false;
+        appointmentChatState.handoffSuccess = false;
+        renderAppointmentChatbot();
+        focusAppointmentChatInput();
+        return;
+      }
+
+      if (stepKey === "name") appointmentChatState.answers.name = result.value;
+      if (stepKey === "mobile") appointmentChatState.answers.mobile = result.value;
+      if (stepKey === "doctor") appointmentChatState.answers.doctorId = result.value;
+      if (stepKey === "reason") appointmentChatState.answers.reason = result.value;
+      if (stepKey === "date") appointmentChatState.answers.preferredDate = result.value;
+      if (stepKey === "timing") appointmentChatState.answers.timingId = result.value;
+
+      setAppointmentChatStep(appointmentChatState.step + 1, true);
+    });
+  }
+}
+
+function ensureAppointmentChatbotUi() {
+  if (appointmentChatbotUi) return appointmentChatbotUi;
+
+  ensureAppointmentChatbotStyles();
+
+  const root = document.createElement("div");
+  root.id = "appointment-chatbot-root";
+  root.className = "pointer-events-none fixed inset-0 z-[80]";
+  root.innerHTML = `
+    <div data-appointment-backdrop class="pointer-events-none absolute inset-0 bg-slate-950/35 opacity-0 transition-opacity duration-200"></div>
+    <section data-appointment-panel class="pointer-events-none absolute bottom-24 left-3 right-3 flex max-h-[78vh] translate-y-4 scale-[0.98] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white opacity-0 shadow-2xl shadow-slate-900/25 transition-all duration-200 md:left-auto md:right-6 md:w-[380px]">
+      <header class="border-b border-slate-200 bg-gradient-to-r from-[#0f4ca0] via-[#0f68c7] to-emerald-500 px-4 py-3 text-white">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-white/85" data-appointment-hospital></p>
+            <p class="truncate text-sm font-extrabold" data-appointment-title></p>
+          </div>
+          <button type="button" data-appointment-close class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/35 bg-white/10 text-white hover:bg-white/20" aria-label="Close chatbot">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </header>
+      <div data-appointment-stream class="appointment-chat-scroll flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-slate-50 to-white px-4 py-4"></div>
+      <div data-appointment-controls class="border-t border-slate-200 bg-white px-3 py-3"></div>
+    </section>
+  `;
+
+  document.body.append(root);
+
+  const backdrop = root.querySelector("[data-appointment-backdrop]");
+  const panel = root.querySelector("[data-appointment-panel]");
+  const closeButton = root.querySelector("[data-appointment-close]");
+  const hospitalName = root.querySelector("[data-appointment-hospital]");
+  const title = root.querySelector("[data-appointment-title]");
+  const stream = root.querySelector("[data-appointment-stream]");
+  const controls = root.querySelector("[data-appointment-controls]");
+
+  appointmentChatbotUi = {
+    root,
+    backdrop,
+    panel,
+    closeButton,
+    hospitalName,
+    title,
+    stream,
+    controls
+  };
+
+  if (closeButton) {
+    closeButton.addEventListener("click", closeAppointmentChatbot);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", closeAppointmentChatbot);
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && appointmentChatState.isOpen) {
+      closeAppointmentChatbot();
+    }
+  });
+
+  renderAppointmentChatbot();
+  return appointmentChatbotUi;
+}
+
 function setupFloatingWhatsAppButton() {
   const floatingButtons = Array.from(document.querySelectorAll("a[data-wa-link].fixed"));
   if (!floatingButtons.length) return;
+
+  ensureAppointmentChatbotUi();
 
   const syncFloatingButton = () => {
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
@@ -550,10 +1441,9 @@ function setupFloatingWhatsAppButton() {
       btn.style.bottom = "1.5rem";
       btn.style.zIndex = "55";
 
-      if (!btn.getAttribute("aria-label")) {
-        btn.setAttribute("aria-label", "WhatsApp Chat");
-      }
-      btn.setAttribute("title", "WhatsApp Chat");
+      btn.setAttribute("aria-label", "Book Appointment");
+      btn.setAttribute("title", "Book Appointment");
+      btn.setAttribute("href", "#");
 
       if (isDesktop) {
         btn.classList.remove("hidden");
@@ -565,6 +1455,18 @@ function setupFloatingWhatsAppButton() {
 
       if (btn.parentElement !== document.body) {
         document.body.append(btn);
+      }
+
+      if (btn.dataset.appointmentLauncherBound !== "true") {
+        btn.dataset.appointmentLauncherBound = "true";
+        btn.addEventListener("click", (event) => {
+          event.preventDefault();
+          if (appointmentChatState.isOpen) {
+            closeAppointmentChatbot();
+            return;
+          }
+          openAppointmentChatbot();
+        });
       }
     });
   };
