@@ -241,6 +241,19 @@ function normalizeText(text) {
   return (text || "").replace(/\s+/g, " ").trim();
 }
 
+function getHostedSiteBasePath() {
+  if (window.location.protocol === "file:") return "";
+  if (!window.location.hostname.endsWith("github.io")) return "";
+  const firstSegment = window.location.pathname.split("/").filter(Boolean)[0];
+  return firstSegment ? `/${firstSegment}` : "";
+}
+
+function resolveSiteAssetPath(relativePath) {
+  const cleanPath = String(relativePath || "").replace(/^\/+/, "");
+  const basePath = getHostedSiteBasePath();
+  return basePath ? `${basePath}/${cleanPath}` : cleanPath;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -1530,6 +1543,7 @@ function setupFloatingWhatsAppButton() {
   const syncFloatingButton = () => {
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const robotIconSrc = `${resolveSiteAssetPath(FLOATING_CHATBOT_ICON)}?v=20260408`;
 
     floatingButtons.forEach((btn) => {
       btn.style.position = "fixed";
@@ -1549,14 +1563,20 @@ function setupFloatingWhatsAppButton() {
         btn.innerHTML = `
           <span class="sr-only">Book Appointment</span>
           <img
-            src="${FLOATING_CHATBOT_ICON}"
+            src="${robotIconSrc}"
             alt=""
+            data-robot-chat-icon
             class="h-full w-full object-cover"
             loading="eager"
             decoding="async"
             draggable="false"
           />
         `;
+      }
+
+      const robotImage = btn.querySelector("img[data-robot-chat-icon]");
+      if (robotImage) {
+        robotImage.setAttribute("src", robotIconSrc);
       }
 
       btn.classList.remove("hidden");
