@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://veludaiyaanhospital.github.io/Veludaiyaan-Hospital/sitemap.xml

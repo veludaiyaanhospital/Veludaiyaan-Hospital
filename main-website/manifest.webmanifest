@@ -1,0 +1,24 @@
+{
+  "name": "Veludaiyaan Ortho & Trauma Specialty Hospital",
+  "short_name": "Veludaiyaan",
+  "description": "24x7 orthopedic and trauma care in Cuddalore.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f4ca0",
+  "icons": [
+    {
+      "src": "LOGO.png",
+      "sizes": "760x220",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo1.jpg",
+      "sizes": "655x517",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
