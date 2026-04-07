@@ -21,10 +21,10 @@ export default function PatientAuthLayout({ children }: { children: React.ReactN
             <Shield className="h-4 w-4" />
             Secure Patient Access
           </div>
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div className="mt-5 inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
             <Image
               alt="Veludaiyaan Hospital Logo"
-              className="h-14 w-full object-contain object-left"
+              className="h-14 w-auto max-w-[320px] object-contain object-left"
               height={112}
               priority
               src={logoSrc}
@@ -44,10 +44,10 @@ export default function PatientAuthLayout({ children }: { children: React.ReactN
           </div>
         </section>
         <section className="mx-auto w-full max-w-md">
-          <div className="mb-4 rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-sm lg:hidden">
+          <div className="mb-4 inline-flex items-center rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-sm lg:hidden">
             <Image
               alt="Veludaiyaan Hospital Logo"
-              className="h-12 w-full object-contain object-center"
+              className="h-12 w-auto max-w-[280px] object-contain object-left"
               height={96}
               priority
               src={logoSrc}
