@@ -319,8 +319,42 @@ function injectAlignmentStyles() {
   document.head.append(style);
 }
 
+function injectHeaderToggleMobileStyles() {
+  if (document.getElementById("site-toggle-mobile-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "site-toggle-mobile-styles";
+  style.textContent = `
+    @media (max-width: 767.98px) {
+      [data-lang-toggle],
+      [data-theme-toggle] {
+        position: relative;
+        min-width: 2.5rem;
+        padding-left: 0.6rem !important;
+        padding-right: 0.6rem !important;
+        gap: 0 !important;
+      }
+
+      [data-lang-toggle] [data-lang-label],
+      [data-theme-toggle] [data-theme-icon] {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+      }
+    }
+  `;
+  document.head.append(style);
+}
+
 function setupGlobalAlignment() {
   injectAlignmentStyles();
+  injectHeaderToggleMobileStyles();
 
   const main = document.querySelector("main");
   if (main) {
