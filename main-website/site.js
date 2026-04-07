@@ -173,7 +173,18 @@ function wirePatientGatewayLinks() {
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1";
 
-  const gatewayUrl = useLocalGateway ? PATIENT_GATEWAY_LOCAL : PATIENT_GATEWAY_PATH;
+  const getHostedBasePath = () => {
+    if (!window.location.hostname.endsWith("github.io")) {
+      return "";
+    }
+
+    const firstSegment = window.location.pathname.split("/").filter(Boolean)[0];
+    return firstSegment ? `/${firstSegment}` : "";
+  };
+
+  const gatewayUrl = useLocalGateway
+    ? PATIENT_GATEWAY_LOCAL
+    : `${getHostedBasePath()}${PATIENT_GATEWAY_PATH}`;
 
   document.querySelectorAll("a[data-patient-gateway]").forEach((el) => {
     el.setAttribute("href", gatewayUrl);

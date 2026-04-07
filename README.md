@@ -5,6 +5,19 @@ This repository contains two projects:
 1. `main-website/` - Static hospital website (HTML + Tailwind CDN + JS)
 2. `patient-gateway-portal/` - Next.js patient portal (App Router + TypeScript)
 
+## Live Deployment (GitHub Pages)
+
+- Deploy workflow: `.github/workflows/deploy-pages.yml`
+- Live URL: `https://veludaiyaanhospital.github.io/Veludaiyaan-Hospital/`
+- Portal URL: `https://veludaiyaanhospital.github.io/Veludaiyaan-Hospital/patient/login/`
+
+### One-time GitHub setup
+
+1. Open repository settings.
+2. Go to `Pages`.
+3. Set Source to `GitHub Actions`.
+4. Push to `main` (already done) and wait for the workflow to finish.
+
 ## Folder Structure
 
 ```txt
@@ -71,4 +84,4 @@ git push -u origin main
 - `.gitignore` is configured to skip `node_modules`, `.next`, logs, and local env files.
 - `main-website/site.js` already routes Patient Gateway links to:
   - local: `http://localhost:3000/patient/login`
-  - hosted: `/patient/login`
+  - hosted: `<repo-base>/patient/login`
