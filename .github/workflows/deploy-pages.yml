@@ -47,6 +47,7 @@ jobs:
           mkdir -p .deploy-site/patient
           cp -R patient-gateway-portal/out/patient/. .deploy-site/patient/
           cp -R patient-gateway-portal/out/_next .deploy-site/_next
+          cp patient-gateway-portal/out/LOGO.png .deploy-site/LOGO.png
           cp patient-gateway-portal/out/hospital-logo.jpg .deploy-site/hospital-logo.jpg
           cp patient-gateway-portal/out/hospital-logo-mark.jpg .deploy-site/hospital-logo-mark.jpg
           touch .deploy-site/.nojekyll
