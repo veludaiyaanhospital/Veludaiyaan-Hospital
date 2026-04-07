@@ -17,22 +17,24 @@ export default function PatientAuthLayout({ children }: { children: React.ReactN
     <div className="portal-shell min-h-screen px-4 py-8">
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-2">
         <section className="hidden rounded-3xl border border-blue-100 bg-white/90 p-10 shadow-xl lg:block">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0f4ca0]">
-            <Shield className="h-4 w-4" />
-            Secure Patient Access
-          </div>
-          <div className="mt-5 inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <Image
-              alt="Veludaiyaan Hospital Logo"
-              className="h-14 w-auto max-w-[320px] object-contain object-left"
-              height={112}
-              priority
-              src={logoSrc}
-              width={640}
-            />
+          <div className="flex flex-col items-start gap-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0f4ca0]">
+              <Shield className="h-4 w-4" />
+              Secure Patient Access
+            </div>
+            <div className="flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <Image
+                alt="Veludaiyaan Hospital Logo"
+                className="h-14 w-auto max-w-[320px] object-contain object-left"
+                height={112}
+                priority
+                src={logoSrc}
+                width={640}
+              />
+            </div>
           </div>
           <h1 className="mt-5 text-4xl font-extrabold leading-tight text-slate-900">
-            Veludaiyaan Hospital Patient Portal
+            Patient Portal
           </h1>
           <p className="mt-4 max-w-xl text-base text-slate-600">
             View appointments, token queue, prescriptions, reports, and support in one secure portal.
