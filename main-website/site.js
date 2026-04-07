@@ -7,6 +7,7 @@ const WHATSAPP_LINK = WHATSAPP_BASE + encodeURIComponent(WHATSAPP_MESSAGE);
 const EMERGENCY_TEL = "tel:+917845927606";
 const PATIENT_GATEWAY_PATH = "/patient/login";
 const PATIENT_GATEWAY_LOCAL = "http://localhost:3000/patient/login";
+const FLOATING_CHATBOT_ICON = "images/robot-chat-icon.png";
 
 const THEME_LABELS = {
   light: "LIGHT",
@@ -1538,6 +1539,23 @@ function setupFloatingWhatsAppButton() {
       btn.setAttribute("aria-label", "Book Appointment");
       btn.setAttribute("title", "Book Appointment");
       btn.setAttribute("href", "#");
+      btn.classList.add("overflow-hidden", "p-0", "ring-2", "ring-white/80", "dark:ring-slate-900/70");
+      btn.classList.remove("bg-gradient-to-br", "from-emerald-500", "to-emerald-600", "text-white");
+
+      if (btn.dataset.robotIconApplied !== "true") {
+        btn.dataset.robotIconApplied = "true";
+        btn.innerHTML = `
+          <span class="sr-only">Book Appointment</span>
+          <img
+            src="${FLOATING_CHATBOT_ICON}"
+            alt=""
+            class="h-full w-full object-cover"
+            loading="eager"
+            decoding="async"
+            draggable="false"
+          />
+        `;
+      }
 
       if (isDesktop) {
         btn.classList.remove("hidden");
