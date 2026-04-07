@@ -11,10 +11,21 @@ const manrope = Manrope({
   display: "swap",
 });
 
+const isGitHubPagesBuild =
+  process.env.GITHUB_PAGES === "true" || process.env.GITHUB_ACTIONS === "true";
+const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] || "Veludaiyaan-Hospital";
+const basePath = isGitHubPagesBuild ? `/${repositoryName}` : "";
+const iconHref = `${basePath}/logo1.jpg`;
+
 export const metadata: Metadata = {
   title: "Veludaiyaan Hospital Patient Portal",
   description:
     "Patient Portal for appointments, token status, prescriptions, reports, and support.",
+  icons: {
+    icon: iconHref,
+    shortcut: iconHref,
+    apple: iconHref,
+  },
 };
 
 export default function RootLayout({
