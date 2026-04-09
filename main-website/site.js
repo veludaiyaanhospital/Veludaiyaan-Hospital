@@ -79,29 +79,26 @@ const ICON_PATHS = {
 };
 
 let currentTheme = "light";
-let currentLanguage = "en";
-let translateInitPromise = null;
 let progressRaf = null;
 let appointmentChatbotUi = null;
 let appointmentTypingTimer = null;
 let hideFloatingBookingHint = () => {};
 let scheduleFloatingBookingHint = () => {};
-const GOOGLE_TRANSLATE_COOKIE_NAME = "googtrans";
 
 const APPOINTMENT_CHAT_CONFIG = {
   hospitalWhatsAppNumber: HOSPITAL_WHATSAPP_NUMBER,
   resetAfterSuccessfulHandoff: false,
   doctors: [
-    { id: "dr-senthil-s", en: "Dr. Senthil S", ta: "டாக்டர் செந்தில் எஸ்" },
-    { id: "dr-anbarasan-k", en: "Dr. Anbarasan K", ta: "டாக்டர் அன்பரசன் கே" },
-    { id: "dr-rajesh-m", en: "Dr. Rajesh M", ta: "டாக்டர் ராஜேஷ் எம்" },
-    { id: "dr-jayakar", en: "Dr. Jayakar", ta: "டாக்டர் ஜெயக்கர்" },
-    { id: "dr-rajini-s", en: "Dr. Rajini S", ta: "டாக்டர் ராஜினி எஸ்" },
-    { id: "dr-nishanth-s", en: "Dr. Nishanth S", ta: "டாக்டர் நிஷாந்த் எஸ்" }
+    { id: "dr-senthil-s", en: "Dr. Senthil S" },
+    { id: "dr-anbarasan-k", en: "Dr. Anbarasan K" },
+    { id: "dr-rajesh-m", en: "Dr. Rajesh M" },
+    { id: "dr-jayakar", en: "Dr. Jayakar" },
+    { id: "dr-rajini-s", en: "Dr. Rajini S" },
+    { id: "dr-nishanth-s", en: "Dr. Nishanth S" }
   ],
   timeSlots: [
-    { id: "morning", en: "9:00 AM - 3:00 PM", ta: "காலை 9:00 - மதியம் 3:00" },
-    { id: "evening", en: "5:30 PM - 9:30 PM", ta: "மாலை 5:30 - இரவு 9:30" }
+    { id: "morning", en: "9:00 AM - 3:00 PM" },
+    { id: "evening", en: "5:30 PM - 9:30 PM" }
   ]
 };
 
@@ -111,10 +108,6 @@ const APPOINTMENT_CHAT_COPY = {
     assistantTitle: "Appointment Booking Assistant",
     welcome:
       "Welcome to Veludaiyaan Ortho & Trauma Specialty Hospital. I will help you book your appointment in a few quick steps.",
-    chooseLanguage: "Please choose your language",
-    chooseLanguageSecondary: "தயவுசெய்து உங்கள் மொழியை தேர்வு செய்யவும்",
-    languageEnglish: "English",
-    languageTamil: "தமிழ்",
     askName: "What is your name?",
     askMobile: "What is your mobile number?",
     askDoctor: "Which doctor would you like to consult?",
@@ -128,14 +121,10 @@ const APPOINTMENT_CHAT_COPY = {
     reasonLabel: "Reason for Visit",
     dateLabel: "Preferred Date",
     timingLabel: "Preferred OP Timing",
-    languageLabel: "Language",
-    languageValue: "English",
-    languageChoiceLabel: "Language",
     selectDoctorPlaceholder: "Select doctor",
     namePlaceholder: "Enter patient name",
     mobilePlaceholder: "Enter 10-digit mobile",
     reasonPlaceholder: "Type complaint / symptoms",
-    datePlaceholder: "Select preferred date",
     continueButton: "Continue",
     backButton: "Back",
     restartButton: "Restart booking",
@@ -159,68 +148,13 @@ const APPOINTMENT_CHAT_COPY = {
     invalidTiming: "Please choose OP timing.",
     bookingSummaryTitle: "Appointment Request",
     confirmAvailability: "Please confirm appointment availability."
-  },
-  ta: {
-    hospitalName: "வேலுடையான் ஆர்த்தோ & டிராமா ஸ்பெஷாலிட்டி ஹாஸ்பிட்டல்",
-    assistantTitle: "அபாயின்மெண்ட் பதிவு உதவியாளர்",
-    welcome:
-      "வேலுடையான் ஆர்த்தோ & டிராமா ஸ்பெஷாலிட்டி ஹாஸ்பிட்டலுக்கு வரவேற்கிறோம். சில எளிய படிகளில் அபாயின்மெண்ட் பதிவு செய்ய உதவுகிறேன்.",
-    chooseLanguage: "உங்கள் மொழியை தேர்வு செய்யவும்",
-    chooseLanguageSecondary: "Please choose your language",
-    languageEnglish: "English",
-    languageTamil: "தமிழ்",
-    askName: "உங்கள் பெயர் என்ன?",
-    askMobile: "உங்கள் மொபைல் எண் என்ன?",
-    askDoctor: "நீங்கள் எந்த மருத்துவரை பார்க்க விரும்புகிறீர்கள்?",
-    askReason: "நீங்கள் வருவதற்கான காரணம் என்ன?",
-    askDate: "எந்த தேதியை விரும்புகிறீர்கள்?",
-    askTiming: "எந்த நேரத்தை விரும்புகிறீர்கள்?",
-    confirmPrompt: "உங்கள் அபாயின்மெண்ட் விவரங்களை உறுதிப்படுத்தவும்",
-    nameLabel: "நோயாளர் பெயர்",
-    phoneLabel: "தொலைபேசி",
-    doctorLabel: "விரும்பும் மருத்துவர்",
-    reasonLabel: "வருகை காரணம்",
-    dateLabel: "விரும்பும் தேதி",
-    timingLabel: "விரும்பும் ஓபி நேரம்",
-    languageLabel: "மொழி",
-    languageValue: "தமிழ்",
-    languageChoiceLabel: "மொழி",
-    selectDoctorPlaceholder: "மருத்துவரை தேர்வு செய்யவும்",
-    namePlaceholder: "நோயாளர் பெயரை உள்ளிடவும்",
-    mobilePlaceholder: "10 இலக்க மொபைல் எண்ணை உள்ளிடவும்",
-    reasonPlaceholder: "பிரச்சனை / அறிகுறிகளை உள்ளிடவும்",
-    datePlaceholder: "விரும்பும் தேதியை தேர்வு செய்யவும்",
-    continueButton: "தொடரவும்",
-    backButton: "பின்னுக்கு",
-    restartButton: "மீண்டும் பதிவு செய்",
-    closeButton: "மூடு",
-    sendWhatsApp: "WhatsApp மூலம் அனுப்பு",
-    preparing: "WhatsApp திறக்க தயாராகிறது...",
-    success: "உங்கள் அபாயின்மெண்ட் செய்தியுடன் WhatsApp திறக்கப்படுகிறது...",
-    fallbackText:
-      "WhatsApp தானாக திறக்காவிட்டால் கீழேயுள்ள விருப்பங்களை பயன்படுத்தவும்.",
-    openWhatsApp: "WhatsApp திறக்கவும்",
-    callHospital: "மருத்துவமனைக்கு அழைக்கவும்",
-    directWhatsApp: "நேரடி WhatsApp",
-    typing: "தட்டச்சு செய்கிறது...",
-    invalidName: "நோயாளர் பெயரை உள்ளிடவும்.",
-    invalidMobileRequired: "மொபைல் எண்ணை உள்ளிடவும்.",
-    invalidMobile: "சரியான 10 இலக்க இந்திய மொபைல் எண்ணை உள்ளிடவும்.",
-    invalidDoctor: "மருத்துவரை தேர்வு செய்யவும்.",
-    invalidReason: "வருகை காரணத்தை உள்ளிடவும்.",
-    invalidDateRequired: "விரும்பும் தேதியை தேர்வு செய்யவும்.",
-    invalidDatePast: "கடந்த தேதியை தேர்வு செய்ய முடியாது.",
-    invalidTiming: "ஓபி நேரத்தை தேர்வு செய்யவும்.",
-    bookingSummaryTitle: "அபாயின்மெண்ட் கோரிக்கை",
-    confirmAvailability: "அபாயின்மெண்ட் கிடைப்பதை உறுதிப்படுத்தவும்."
   }
 };
 
-const APPOINTMENT_CHAT_STEP_KEYS = ["language", "name", "mobile", "doctor", "reason", "date", "timing", "confirm"];
+const APPOINTMENT_CHAT_STEP_KEYS = ["name", "mobile", "doctor", "reason", "date", "timing", "confirm"];
 
 const appointmentChatState = {
   isOpen: false,
-  language: null,
   step: 0,
   typing: false,
   error: "",
@@ -265,19 +199,19 @@ function escapeHtml(value) {
 }
 
 function getAppointmentChatLanguage() {
-  return appointmentChatState.language === "ta" ? "ta" : "en";
+  return "en";
 }
 
-function getAppointmentChatCopy(lang = getAppointmentChatLanguage()) {
-  return APPOINTMENT_CHAT_COPY[lang === "ta" ? "ta" : "en"];
+function getAppointmentChatCopy() {
+  return APPOINTMENT_CHAT_COPY.en;
 }
 
 function getFloatingBookingHintLabel() {
-  return currentLanguage === "ta" ? "அபாயின்மெண்ட் பதிவு" : "Book Appointment";
+  return "Book Appointment";
 }
 
 function getLauncherChatBadgeLabel() {
-  return currentLanguage === "ta" ? "அரட்டை" : "CHAT";
+  return "CHAT";
 }
 
 function getResponsiveLauncherPlacement() {
@@ -331,14 +265,14 @@ function getAppointmentTimingById(timingId) {
   return APPOINTMENT_CHAT_CONFIG.timeSlots.find((slot) => slot.id === timingId) || null;
 }
 
-function formatAppointmentDate(dateValue, lang = getAppointmentChatLanguage()) {
+function formatAppointmentDate(dateValue) {
   if (!dateValue) return "";
 
   const parsed = new Date(`${dateValue}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return dateValue;
 
   try {
-    return new Intl.DateTimeFormat(lang === "ta" ? "ta-IN" : "en-IN", {
+    return new Intl.DateTimeFormat("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric"
@@ -365,61 +299,41 @@ function getAppointmentStepQuestion(step, copy) {
     case "confirm":
       return copy.confirmPrompt;
     default:
-      return copy.chooseLanguage;
+      return copy.askName;
   }
 }
 
-function getAppointmentStepAnswer(step, lang = getAppointmentChatLanguage()) {
-  const copy = getAppointmentChatCopy(lang);
+function getAppointmentStepAnswer(step) {
   const { answers } = appointmentChatState;
 
   switch (APPOINTMENT_CHAT_STEP_KEYS[step]) {
-    case "language":
-      return copy.languageValue;
     case "name":
       return answers.name;
     case "mobile":
       return answers.mobile ? `+91 ${answers.mobile}` : "";
     case "doctor": {
       const doctor = getAppointmentDoctorById(answers.doctorId);
-      return doctor ? doctor[lang] : "";
+      return doctor ? doctor.en : "";
     }
     case "reason":
       return answers.reason;
     case "date":
-      return formatAppointmentDate(answers.preferredDate, lang);
+      return formatAppointmentDate(answers.preferredDate);
     case "timing": {
       const slot = getAppointmentTimingById(answers.timingId);
-      return slot ? slot[lang] : "";
+      return slot ? slot.en : "";
     }
     default:
       return "";
   }
 }
 
-function buildAppointmentWhatsAppMessage(lang, answers) {
-  const language = lang === "ta" ? "ta" : "en";
+function buildAppointmentWhatsAppMessage(_lang, answers) {
   const doctor = getAppointmentDoctorById(answers.doctorId);
   const timing = getAppointmentTimingById(answers.timingId);
-  const doctorLabel = doctor ? doctor[language] : answers.doctorId;
-  const timingLabel = timing ? timing[language] : answers.timingId;
-  const dateLabel = formatAppointmentDate(answers.preferredDate, language);
-
-  if (language === "ta") {
-    return [
-      "அபாயின்மெண்ட் கோரிக்கை",
-      "",
-      `நோயாளர் பெயர்: ${answers.name}`,
-      `தொலைபேசி: ${answers.mobile}`,
-      `விரும்பும் மருத்துவர்: ${doctorLabel}`,
-      `வருகை காரணம்: ${answers.reason}`,
-      `விரும்பும் தேதி: ${dateLabel}`,
-      `விரும்பும் ஓபி நேரம்: ${timingLabel}`,
-      "மொழி: தமிழ்",
-      "",
-      "அபாயின்மெண்ட் கிடைப்பதை உறுதிப்படுத்தவும்."
-    ].join("\n");
-  }
+  const doctorLabel = doctor ? doctor.en : answers.doctorId;
+  const timingLabel = timing ? timing.en : answers.timingId;
+  const dateLabel = formatAppointmentDate(answers.preferredDate);
 
   return [
     "Appointment Request",
@@ -430,7 +344,6 @@ function buildAppointmentWhatsAppMessage(lang, answers) {
     `Reason for Visit: ${answers.reason}`,
     `Preferred Date: ${dateLabel}`,
     `Preferred OP Timing: ${timingLabel}`,
-    "Language: English",
     "",
     "Please confirm appointment availability."
   ].join("\n");
@@ -526,7 +439,6 @@ function setAppointmentChatStep(nextStep, withTyping = true) {
 
 function resetAppointmentChatState() {
   clearAppointmentTypingTimer();
-  appointmentChatState.language = null;
   appointmentChatState.step = 0;
   appointmentChatState.typing = false;
   appointmentChatState.error = "";
@@ -785,7 +697,6 @@ function injectHeaderToggleMobileStyles() {
   style.id = "site-toggle-mobile-styles";
   style.textContent = `
     @media (max-width: 767.98px) {
-      [data-lang-toggle],
       [data-theme-toggle] {
         position: relative;
         min-width: 2.5rem;
@@ -794,7 +705,6 @@ function injectHeaderToggleMobileStyles() {
         gap: 0 !important;
       }
 
-      [data-lang-toggle] [data-lang-label],
       [data-theme-toggle] [data-theme-icon] {
         position: absolute !important;
         width: 1px !important;
@@ -980,10 +890,6 @@ function setupAmbientAnimations() {
     img.classList.add("site-hero-media");
   });
 
-  document.querySelectorAll("[data-lang-toggle] svg").forEach((icon) => {
-    icon.classList.add("site-rotate-slow");
-  });
-
   const firstSection = document.querySelector("main > section:first-of-type");
   if (firstSection) {
     const heroBits = Array.from(firstSection.querySelectorAll("h1:not([data-reveal]), h2:not([data-reveal]), p:not([data-reveal]), a, img, article")).slice(0, 10);
@@ -1059,12 +965,12 @@ function getAppointmentTodayInputValue() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function getAppointmentSummaryHtml(copy, lang) {
+function getAppointmentSummaryHtml(copy) {
   const doctor = getAppointmentDoctorById(appointmentChatState.answers.doctorId);
   const timing = getAppointmentTimingById(appointmentChatState.answers.timingId);
-  const doctorText = doctor ? doctor[lang] : "";
-  const timingText = timing ? timing[lang] : "";
-  const dateText = formatAppointmentDate(appointmentChatState.answers.preferredDate, lang);
+  const doctorText = doctor ? doctor.en : "";
+  const timingText = timing ? timing.en : "";
+  const dateText = formatAppointmentDate(appointmentChatState.answers.preferredDate);
 
   return `
     <div class="mt-3 rounded-2xl border border-sky-100 bg-sky-50/75 p-3 text-xs text-slate-700 shadow-sm">
@@ -1076,7 +982,6 @@ function getAppointmentSummaryHtml(copy, lang) {
         <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.reasonLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(appointmentChatState.answers.reason)}</dd></div>
         <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.dateLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(dateText)}</dd></div>
         <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.timingLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(timingText)}</dd></div>
-        <div class="grid grid-cols-[9rem_1fr] gap-2"><dt class="font-semibold text-slate-500">${escapeHtml(copy.languageLabel)}</dt><dd class="font-semibold text-slate-800">${escapeHtml(copy.languageValue)}</dd></div>
       </dl>
     </div>
   `;
@@ -1101,13 +1006,10 @@ function getAppointmentConversationMarkup(copy, lang) {
   `;
 
   sections.push(botBubble(escapeHtml(copy.welcome)));
-  sections.push(botBubble(`${escapeHtml(copy.chooseLanguage)}<br><span class="text-xs text-slate-500">${escapeHtml(copy.chooseLanguageSecondary)}</span>`));
 
-  if (appointmentChatState.language) {
-    sections.push(userBubble(escapeHtml(copy.languageValue)));
-  }
+  const confirmStep = APPOINTMENT_CHAT_STEP_KEYS.length - 1;
 
-  for (let step = 1; step <= 6; step += 1) {
+  for (let step = 0; step < confirmStep; step += 1) {
     if (appointmentChatState.step > step) {
       sections.push(botBubble(escapeHtml(getAppointmentStepQuestion(step, copy))));
       sections.push(userBubble(escapeHtml(getAppointmentStepAnswer(step, lang))));
@@ -1120,7 +1022,7 @@ function getAppointmentConversationMarkup(copy, lang) {
     }
   }
 
-  if (appointmentChatState.step === 7) {
+  if (appointmentChatState.step === confirmStep) {
     sections.push(appointmentChatState.typing ? typingBubble : botBubble(escapeHtml(copy.confirmPrompt)));
     if (!appointmentChatState.typing) {
       sections.push(getAppointmentSummaryHtml(copy, lang));
@@ -1145,16 +1047,6 @@ function getAppointmentComposerMarkup(copy, lang) {
         </div>
       `
       : "";
-
-  if (stepKey === "language") {
-    return `
-      <div class="grid gap-2">
-        <button type="button" data-appointment-language="en" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#0f4ca0] to-[#0f68c7] px-3 py-2.5 text-sm font-bold text-white shadow">${escapeHtml(APPOINTMENT_CHAT_COPY.en.languageEnglish)}</button>
-        <button type="button" data-appointment-language="ta" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-100">${escapeHtml(APPOINTMENT_CHAT_COPY.ta.languageTamil)}</button>
-      </div>
-      ${navActions}
-    `;
-  }
 
   if (stepKey === "confirm") {
     const message = buildAppointmentWhatsAppMessage(lang, appointmentChatState.answers);
@@ -1277,7 +1169,7 @@ function renderAppointmentChatbot() {
   if (!appointmentChatbotUi) return;
 
   const lang = getAppointmentChatLanguage();
-  const copy = getAppointmentChatCopy(lang);
+  const copy = getAppointmentChatCopy();
   appointmentChatbotUi.hospitalName.textContent = copy.hospitalName;
   appointmentChatbotUi.title.textContent = copy.assistantTitle;
   appointmentChatbotUi.stream.innerHTML = getAppointmentConversationMarkup(copy, lang);
@@ -1318,15 +1210,6 @@ function openAppointmentChatbot() {
 
 function bindAppointmentChatbotControls() {
   if (!appointmentChatbotUi) return;
-
-  appointmentChatbotUi.controls.querySelectorAll("[data-appointment-language]").forEach((button) => {
-    if (button.dataset.bound === "true") return;
-    button.dataset.bound = "true";
-    button.addEventListener("click", () => {
-      appointmentChatState.language = button.dataset.appointmentLanguage === "ta" ? "ta" : "en";
-      setAppointmentChatStep(1, true);
-    });
-  });
 
   appointmentChatbotUi.controls.querySelectorAll("[data-appointment-restart]").forEach((button) => {
     if (button.dataset.bound === "true") return;
@@ -1789,191 +1672,6 @@ function setupThemeToggle() {
   });
 }
 
-function getGoogleTranslateCookieLanguage() {
-  if (typeof document === "undefined") return null;
-
-  const cookies = document.cookie ? document.cookie.split(";") : [];
-  for (const rawCookie of cookies) {
-    const cookie = rawCookie.trim();
-    if (!cookie.startsWith(`${GOOGLE_TRANSLATE_COOKIE_NAME}=`)) continue;
-
-    const encodedValue = cookie.slice(GOOGLE_TRANSLATE_COOKIE_NAME.length + 1);
-    const value = decodeURIComponent(encodedValue);
-    const parts = value.split("/").filter(Boolean);
-    const language = parts[parts.length - 1];
-
-    if (language === "en" || language === "ta") {
-      return language;
-    }
-  }
-
-  return null;
-}
-
-function setGoogleTranslateCookieLanguage(language) {
-  if (typeof document === "undefined") return;
-
-  const target = language === "ta" ? "ta" : "en";
-  const value = encodeURIComponent(`/en/${target}`);
-  const secure = window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${GOOGLE_TRANSLATE_COOKIE_NAME}=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
-}
-
-function ensureTranslateStyles() {
-  if (document.getElementById("translate-ui-hide")) return;
-
-  const style = document.createElement("style");
-  style.id = "translate-ui-hide";
-  style.textContent = `
-    .goog-te-banner-frame.skiptranslate { display: none !important; }
-    body { top: 0 !important; }
-    #google_translate_element { position: absolute; left: -9999px; top: -9999px; }
-  `;
-  document.head.append(style);
-}
-
-function ensureTranslateWidget() {
-  if (translateInitPromise) return translateInitPromise;
-
-  translateInitPromise = new Promise((resolve, reject) => {
-    if (document.querySelector(".goog-te-combo")) {
-      resolve();
-      return;
-    }
-
-    ensureTranslateStyles();
-
-    let container = document.getElementById("google_translate_element");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "google_translate_element";
-      document.body.append(container);
-    }
-
-    window.googleTranslateElementInit = () => {
-      try {
-        if (!window.google || !window.google.translate) {
-          reject(new Error("Google Translate failed to initialize."));
-          return;
-        }
-
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: "en",
-            includedLanguages: "en,ta",
-            autoDisplay: false
-          },
-          "google_translate_element"
-        );
-
-        setTimeout(resolve, 250);
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    if (!document.getElementById("google-translate-script")) {
-      const script = document.createElement("script");
-      script.id = "google-translate-script";
-      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-      script.async = true;
-      script.onerror = () => reject(new Error("Google Translate script failed to load."));
-      document.head.append(script);
-    }
-  });
-
-  return translateInitPromise;
-}
-
-function updateLanguageToggleUi() {
-  const isTamil = currentLanguage === "ta";
-
-  document.querySelectorAll("[data-lang-label]").forEach((label) => {
-    label.textContent = isTamil ? "English" : "Tamil";
-  });
-
-  document.querySelectorAll("[data-lang-toggle]").forEach((btn) => {
-    btn.setAttribute("aria-label", isTamil ? "Switch language to English" : "Switch language to Tamil");
-    btn.setAttribute("title", isTamil ? "Switch to English" : "Switch to Tamil");
-  });
-
-  document.querySelectorAll("[data-robot-chat-badge]").forEach((badge) => {
-    badge.textContent = getLauncherChatBadgeLabel();
-  });
-}
-
-function applyLanguage(language, options = {}) {
-  const forceWidget = options.forceWidget === true;
-  currentLanguage = language === "ta" ? "ta" : "en";
-  updateLanguageToggleUi();
-
-  try {
-    localStorage.setItem("site-language", currentLanguage);
-  } catch (_) {
-    // Ignore storage restrictions.
-  }
-
-  const existingWidget = Boolean(document.querySelector(".goog-te-combo"));
-  const shouldInitializeWidget =
-    forceWidget ||
-    currentLanguage === "ta" ||
-    existingWidget ||
-    Boolean(translateInitPromise);
-
-  if (!shouldInitializeWidget) {
-    setGoogleTranslateCookieLanguage(currentLanguage);
-    return;
-  }
-
-  ensureTranslateWidget()
-    .then(() => {
-      const combo = document.querySelector(".goog-te-combo");
-      if (!combo) return;
-
-      const target = currentLanguage === "ta" ? "ta" : "en";
-      if (combo.value !== target) {
-        combo.value = target;
-        combo.dispatchEvent(new Event("change"));
-      }
-
-      setGoogleTranslateCookieLanguage(currentLanguage);
-    })
-    .catch(() => {
-      // Ignore translate failures and keep English content.
-    });
-}
-
-function setupLanguageToggle() {
-  let initialLanguage = "en";
-  let hasSavedLanguage = false;
-
-  try {
-    const saved = localStorage.getItem("site-language");
-    if (saved === "en" || saved === "ta") {
-      initialLanguage = saved;
-      hasSavedLanguage = true;
-    }
-  } catch (_) {
-    // Ignore storage restrictions.
-  }
-
-  const cookieLanguage = getGoogleTranslateCookieLanguage();
-  if (!hasSavedLanguage && (cookieLanguage === "en" || cookieLanguage === "ta")) {
-    initialLanguage = cookieLanguage;
-  }
-
-  updateLanguageToggleUi();
-
-  document.querySelectorAll("[data-lang-toggle]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      applyLanguage(currentLanguage === "ta" ? "en" : "ta");
-    });
-  });
-
-  const shouldForceWidgetOnLoad = initialLanguage === "ta" || cookieLanguage === "ta";
-  applyLanguage(initialLanguage, { forceWidget: shouldForceWidgetOnLoad });
-}
-
 function setupMobileMenu() {
   const menuBtn = document.getElementById("mobileMenuBtn");
   const menu = document.getElementById("mobileMenu");
@@ -2141,10 +1839,10 @@ function init() {
   setupFloatingWhatsAppButton();
   setupAmbientAnimations();
   setupThemeToggle();
-  setupLanguageToggle();
   setupMobileMenu();
   highlightActiveNav();
   setupRevealAnimations();
 }
 
 init();
+

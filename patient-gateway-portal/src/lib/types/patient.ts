@@ -91,7 +91,7 @@ export interface Invoice {
 }
 
 export interface NotificationSettings {
-  language: "en" | "ta";
+  language: "en";
   sms: boolean;
   whatsapp: boolean;
   email: boolean;
@@ -121,3 +121,4 @@ export interface SupportTicket {
   subject: string;
   message: string;
 }
+

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { BellRing, Globe2, Lock } from "lucide-react";
 
@@ -59,7 +59,7 @@ export function NotificationSettings({ settings, onChange }: NotificationSetting
             Language
           </div>
           <Select
-            onValueChange={(value: "en" | "ta") => onChange({ language: value })}
+            onValueChange={(value: "en") => onChange({ language: value })}
             value={settings.language}
           >
             <SelectTrigger className="w-full sm:max-w-xs">
@@ -67,7 +67,6 @@ export function NotificationSettings({ settings, onChange }: NotificationSetting
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="en">English</SelectItem>
-              <SelectItem value="ta">Tamil</SelectItem>
             </SelectContent>
           </Select>
         </div>

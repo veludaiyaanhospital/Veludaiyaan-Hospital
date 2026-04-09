@@ -1,4 +1,4 @@
-﻿export type Locale = "en" | "ta";
+export type Locale = "en";
 
 interface CopyDictionary {
   appName: string;
@@ -34,24 +34,9 @@ const copy: Record<Locale, CopyDictionary> = {
     theme: "Theme",
     language: "Language",
   },
-  ta: {
-    appName: "வேலுடையான் மருத்துவமனை நோயாளர் போர்டல்",
-    dashboard: "டாஷ்போர்டு",
-    tokenStatus: "டோக்கன் நிலை",
-    appointments: "நேரம்சேர்ப்பு",
-    prescriptions: "மருந்து சீட்டுகள்",
-    reports: "அறிக்கைகள்",
-    profile: "சுயவிவரம்",
-    support: "உதவி",
-    settings: "அமைப்புகள்",
-    welcomeBack: "மீண்டும் வரவேற்கிறோம்",
-    quickActions: "விரைவு செயல்கள்",
-    logout: "வெளியேறு",
-    theme: "தீம்",
-    language: "மொழி",
-  },
 };
 
 export function getCopy(locale: Locale): CopyDictionary {
   return copy[locale] ?? copy.en;
 }
+

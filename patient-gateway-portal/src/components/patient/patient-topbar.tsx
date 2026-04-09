@@ -1,7 +1,6 @@
-﻿"use client";
+"use client";
 
 import {
-  Languages,
   LogOut,
   Menu,
   MoonStar,
@@ -20,8 +19,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { getCopy } from "@/lib/i18n/patient-copy";
+import { cn } from "@/lib/utils";
 import { useOtpAuth } from "@/hooks/use-auth";
 import { usePatientPreferencesStore } from "@/store/patient-preferences-store";
 
@@ -35,7 +34,6 @@ export function PatientTopbar({ title, subtitle }: PatientTopbarProps) {
   const { logoutMutation } = useOtpAuth();
 
   const settings = usePatientPreferencesStore((state) => state.settings);
-  const patchSettings = usePatientPreferencesStore((state) => state.patchSettings);
   const theme = usePatientPreferencesStore((state) => state.theme);
   const toggleTheme = usePatientPreferencesStore((state) => state.toggleTheme);
 
@@ -96,16 +94,6 @@ export function PatientTopbar({ title, subtitle }: PatientTopbarProps) {
         </div>
 
         <div className="flex w-full items-center justify-end gap-1 sm:w-auto sm:gap-2">
-          <Button
-            className="h-9 gap-1 px-2 sm:px-3"
-            onClick={() => patchSettings({ language: settings.language === "en" ? "ta" : "en" })}
-            size="sm"
-            variant="outline"
-          >
-            <Languages className="h-4 w-4" />
-            <span className="hidden sm:inline">{settings.language === "en" ? "தமிழ்" : "English"}</span>
-            <span className="sr-only sm:hidden">Switch Language</span>
-          </Button>
           <Button className="h-9 gap-1 px-2 sm:px-3" onClick={toggleTheme} size="sm" variant="outline">
             {theme === "light" ? <MoonStar className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             <span className="hidden sm:inline">{theme === "light" ? "Dark" : "Light"}</span>
@@ -127,3 +115,4 @@ export function PatientTopbar({ title, subtitle }: PatientTopbarProps) {
     </header>
   );
 }
+
