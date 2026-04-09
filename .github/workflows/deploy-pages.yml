@@ -36,7 +36,7 @@ jobs:
       - name: Build portal for GitHub Pages
         working-directory: patient-gateway-portal
         env:
-          GITHUB_PAGES: ${{ vars.CUSTOM_DOMAIN == '' && 'true' || 'false' }}
+          GITHUB_PAGES: "false"
         run: npm run build
 
       - name: Assemble deploy artifact
@@ -57,8 +57,12 @@ jobs:
           touch .deploy-site/.nojekyll
 
       - name: Add custom domain CNAME
-        if: ${{ vars.CUSTOM_DOMAIN != '' }}
-        run: echo "${{ vars.CUSTOM_DOMAIN }}" > .deploy-site/CNAME
+        run: |
+          if [ -n "${{ vars.CUSTOM_DOMAIN }}" ]; then
+            echo "${{ vars.CUSTOM_DOMAIN }}" > .deploy-site/CNAME
+          else
+            echo "www.veludaiyaanhospital.com" > .deploy-site/CNAME
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
