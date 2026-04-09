@@ -86,6 +86,7 @@ let appointmentChatbotUi = null;
 let appointmentTypingTimer = null;
 let hideFloatingBookingHint = () => {};
 let scheduleFloatingBookingHint = () => {};
+const GOOGLE_TRANSLATE_COOKIE_NAME = "googtrans";
 
 const APPOINTMENT_CHAT_CONFIG = {
   hospitalWhatsAppNumber: HOSPITAL_WHATSAPP_NUMBER,
@@ -1788,6 +1789,36 @@ function setupThemeToggle() {
   });
 }
 
+function getGoogleTranslateCookieLanguage() {
+  if (typeof document === "undefined") return null;
+
+  const cookies = document.cookie ? document.cookie.split(";") : [];
+  for (const rawCookie of cookies) {
+    const cookie = rawCookie.trim();
+    if (!cookie.startsWith(`${GOOGLE_TRANSLATE_COOKIE_NAME}=`)) continue;
+
+    const encodedValue = cookie.slice(GOOGLE_TRANSLATE_COOKIE_NAME.length + 1);
+    const value = decodeURIComponent(encodedValue);
+    const parts = value.split("/").filter(Boolean);
+    const language = parts[parts.length - 1];
+
+    if (language === "en" || language === "ta") {
+      return language;
+    }
+  }
+
+  return null;
+}
+
+function setGoogleTranslateCookieLanguage(language) {
+  if (typeof document === "undefined") return;
+
+  const target = language === "ta" ? "ta" : "en";
+  const value = encodeURIComponent(`/en/${target}`);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${GOOGLE_TRANSLATE_COOKIE_NAME}=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+}
+
 function ensureTranslateStyles() {
   if (document.getElementById("translate-ui-hide")) return;
 
@@ -1871,7 +1902,8 @@ function updateLanguageToggleUi() {
   });
 }
 
-function applyLanguage(language) {
+function applyLanguage(language, options = {}) {
+  const forceWidget = options.forceWidget === true;
   currentLanguage = language === "ta" ? "ta" : "en";
   updateLanguageToggleUi();
 
@@ -1879,6 +1911,18 @@ function applyLanguage(language) {
     localStorage.setItem("site-language", currentLanguage);
   } catch (_) {
     // Ignore storage restrictions.
+  }
+
+  const existingWidget = Boolean(document.querySelector(".goog-te-combo"));
+  const shouldInitializeWidget =
+    forceWidget ||
+    currentLanguage === "ta" ||
+    existingWidget ||
+    Boolean(translateInitPromise);
+
+  if (!shouldInitializeWidget) {
+    setGoogleTranslateCookieLanguage(currentLanguage);
+    return;
   }
 
   ensureTranslateWidget()
@@ -1891,6 +1935,8 @@ function applyLanguage(language) {
         combo.value = target;
         combo.dispatchEvent(new Event("change"));
       }
+
+      setGoogleTranslateCookieLanguage(currentLanguage);
     })
     .catch(() => {
       // Ignore translate failures and keep English content.
@@ -1899,13 +1945,21 @@ function applyLanguage(language) {
 
 function setupLanguageToggle() {
   let initialLanguage = "en";
+  let hasSavedLanguage = false;
+
   try {
     const saved = localStorage.getItem("site-language");
     if (saved === "en" || saved === "ta") {
       initialLanguage = saved;
+      hasSavedLanguage = true;
     }
   } catch (_) {
     // Ignore storage restrictions.
+  }
+
+  const cookieLanguage = getGoogleTranslateCookieLanguage();
+  if (!hasSavedLanguage && (cookieLanguage === "en" || cookieLanguage === "ta")) {
+    initialLanguage = cookieLanguage;
   }
 
   updateLanguageToggleUi();
@@ -1916,7 +1970,8 @@ function setupLanguageToggle() {
     });
   });
 
-  applyLanguage(initialLanguage);
+  const shouldForceWidgetOnLoad = initialLanguage === "ta" || cookieLanguage === "ta";
+  applyLanguage(initialLanguage, { forceWidget: shouldForceWidgetOnLoad });
 }
 
 function setupMobileMenu() {
@@ -1954,12 +2009,79 @@ function setupMobileMenu() {
   });
 }
 
+function getSitePathContext(pathname) {
+  const segments = pathname.split("/").filter(Boolean);
+
+  if (window.location.hostname.endsWith("github.io") && segments.length) {
+    return {
+      basePath: `/${segments[0]}`,
+      pathSegments: segments.slice(1)
+    };
+  }
+
+  return {
+    basePath: "",
+    pathSegments: segments
+  };
+}
+
+function enforceCleanUrl() {
+  const { basePath, pathSegments } = getSitePathContext(window.location.pathname);
+  if (!pathSegments.length) return false;
+
+  const last = pathSegments[pathSegments.length - 1].toLowerCase();
+  let cleanPath = null;
+
+  if (last === "index.html") {
+    const parentSegments = pathSegments.slice(0, -1);
+    cleanPath = parentSegments.length ? `/${parentSegments.join("/")}/` : "/";
+  } else {
+    const match = last.match(/^(about|services|doctors|facilities|contact)\.html$/);
+    if (match) {
+      const nextSegments = pathSegments.slice(0, -1).concat(match[1]);
+      cleanPath = `/${nextSegments.join("/")}/`;
+    }
+  }
+
+  if (!cleanPath) return false;
+
+  const targetPath = `${basePath}${cleanPath}`;
+  if (targetPath === window.location.pathname) return false;
+
+  window.location.replace(`${targetPath}${window.location.search}${window.location.hash}`);
+  return true;
+}
+
+function getPageKeyFromPath(pathname) {
+  const { pathSegments: segments } = getSitePathContext(pathname);
+
+  if (!segments.length) return "home";
+
+  let page = segments[segments.length - 1].toLowerCase();
+
+  if (page === "index.html") {
+    page = segments.length > 1 ? segments[segments.length - 2].toLowerCase() : "home";
+  }
+
+  page = page.replace(/\.html$/, "");
+  return page === "index" ? "home" : page;
+}
+
+function getPageKeyFromHref(href) {
+  try {
+    const resolved = new URL(href, window.location.origin);
+    return getPageKeyFromPath(resolved.pathname);
+  } catch {
+    return "home";
+  }
+}
+
 function highlightActiveNav() {
-  const current = window.location.pathname.split("/").pop() || "index.html";
+  const current = getPageKeyFromPath(window.location.pathname);
 
   document.querySelectorAll("[data-nav]").forEach((link) => {
     const href = link.getAttribute("href") || "";
-    const page = href.split("/").pop() || "index.html";
+    const page = getPageKeyFromHref(href);
     const active = page === current;
 
     link.classList.toggle("bg-brand-100", active);
@@ -2008,6 +2130,8 @@ function setupRevealAnimations() {
 }
 
 function init() {
+  if (enforceCleanUrl()) return;
+
   wireQuickLinks();
   wirePatientGatewayLinks();
   setupScrollProgressBar();

@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const isGitHubPagesBuild = process.env.GITHUB_PAGES === "true" || process.env.GITHUB_ACTIONS === "true";
+const isGitHubPagesBuild = process.env.GITHUB_PAGES === "true";
 const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] || "Veludaiyaan-Hospital";
 const pagesBasePath = `/${repositoryName}`;
 

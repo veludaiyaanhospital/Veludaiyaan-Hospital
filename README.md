@@ -18,6 +18,26 @@ This repository contains two projects:
 3. Set Source to `GitHub Actions`.
 4. Push to `main` (already done) and wait for the workflow to finish.
 
+## AWS Deployment
+
+- Deployment guide: `AWS_DEPLOY.md`
+- Deploy scripts:
+  - `scripts/assemble-site.ps1`
+  - `scripts/deploy-aws-s3.ps1`
+
+Quick start command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\deploy-aws-s3.ps1 `
+  -BucketName "<your-unique-s3-bucket-name>" `
+  -Region "ap-south-1"
+```
+
+## GitHub Custom Domain
+
+- Setup guide: `GITHUB_CUSTOM_DOMAIN.md`
+- GitHub Actions deployment now supports custom domains using repository variable `CUSTOM_DOMAIN`.
+
 ## Folder Structure
 
 ```txt

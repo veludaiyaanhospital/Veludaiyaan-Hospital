@@ -27,3 +27,4 @@ pnpm-debug.log*
 # Temporary
 *.tmp
 *.temp
+.deploy-site/

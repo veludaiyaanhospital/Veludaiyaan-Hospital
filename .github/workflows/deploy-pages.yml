@@ -36,7 +36,7 @@ jobs:
       - name: Build portal for GitHub Pages
         working-directory: patient-gateway-portal
         env:
-          GITHUB_PAGES: "true"
+          GITHUB_PAGES: ${{ vars.CUSTOM_DOMAIN == '' && 'true' || 'false' }}
         run: npm run build
 
       - name: Assemble deploy artifact
@@ -44,6 +44,10 @@ jobs:
           rm -rf .deploy-site
           mkdir -p .deploy-site
           rsync -a main-website/ .deploy-site/
+          for page in about services doctors facilities contact; do
+            mkdir -p ".deploy-site/$page"
+            cp "main-website/$page.html" ".deploy-site/$page/index.html"
+          done
           mkdir -p .deploy-site/patient
           cp -R patient-gateway-portal/out/patient/. .deploy-site/patient/
           cp -R patient-gateway-portal/out/_next .deploy-site/_next
@@ -51,6 +55,10 @@ jobs:
           cp patient-gateway-portal/out/hospital-logo.jpg .deploy-site/hospital-logo.jpg
           cp patient-gateway-portal/out/hospital-logo-mark.jpg .deploy-site/hospital-logo-mark.jpg
           touch .deploy-site/.nojekyll
+
+      - name: Add custom domain CNAME
+        if: ${{ vars.CUSTOM_DOMAIN != '' }}
+        run: echo "${{ vars.CUSTOM_DOMAIN }}" > .deploy-site/CNAME
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
