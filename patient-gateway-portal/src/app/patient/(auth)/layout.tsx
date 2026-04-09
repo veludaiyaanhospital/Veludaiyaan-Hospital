@@ -7,8 +7,7 @@ export const metadata: Metadata = {
 };
 
 export default function PatientAuthLayout({ children }: { children: React.ReactNode }) {
-  const isGitHubPagesBuild =
-    process.env.GITHUB_PAGES === "true" || process.env.GITHUB_ACTIONS === "true";
+  const isGitHubPagesBuild = process.env.GITHUB_PAGES === "true";
   const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] || "Veludaiyaan-Hospital";
   const basePath = isGitHubPagesBuild ? `/${repositoryName}` : "";
   const logoSrc = `${basePath}/LOGO.png`;
