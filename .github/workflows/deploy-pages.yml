@@ -47,6 +47,22 @@ jobs:
           for page in about services doctors facilities contact; do
             mkdir -p ".deploy-site/$page"
             cp "main-website/$page.html" ".deploy-site/$page/index.html"
+            rm -f ".deploy-site/$page.html"
+            printf '%s\n' \
+              '<!doctype html>' \
+              '<html lang="en">' \
+              '<head>' \
+              '  <meta charset="utf-8">' \
+              '  <meta http-equiv="refresh" content="0; url=/'"$page"'/">' \
+              '  <link rel="canonical" href="https://www.veludaiyaanhospital.com/'"$page"'/">' \
+              '  <meta name="robots" content="noindex, follow">' \
+              "  <script>window.location.replace('/$page/');</script>" \
+              '  <title>Redirecting...</title>' \
+              '</head>' \
+              '<body>' \
+              '  Redirecting to <a href="/'"$page"'/">/'"$page"'/</a>.' \
+              '</body>' \
+              '</html>' > ".deploy-site/$page.html"
           done
           mkdir -p .deploy-site/patient
           cp -R patient-gateway-portal/out/patient/. .deploy-site/patient/
@@ -80,3 +96,26 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify-indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify IndexNow for updated URLs
+        run: |
+          curl -sS -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d '{
+              "host": "www.veludaiyaanhospital.com",
+              "key": "92aa23795db645d2a8d93cfb1e3f377e",
+              "keyLocation": "https://www.veludaiyaanhospital.com/92aa23795db645d2a8d93cfb1e3f377e.txt",
+              "urlList": [
+                "https://www.veludaiyaanhospital.com/",
+                "https://www.veludaiyaanhospital.com/about/",
+                "https://www.veludaiyaanhospital.com/services/",
+                "https://www.veludaiyaanhospital.com/doctors/",
+                "https://www.veludaiyaanhospital.com/facilities/",
+                "https://www.veludaiyaanhospital.com/contact/"
+              ]
+            }'
+        continue-on-error: true
