@@ -25,6 +25,12 @@ This repository contains two projects:
   - `scripts/assemble-site.ps1`
   - `scripts/deploy-aws-s3.ps1`
 
+## Secure HMS Integration
+
+- Architecture guide: `SECURE_HMS_INTEGRATION.md`
+- Secure backend bridge: `patient-gateway-bridge/`
+- Frontend can call the bridge when `NEXT_PUBLIC_PATIENT_GATEWAY_API_BASE_URL` is configured
+
 Quick start command:
 
 ```powershell

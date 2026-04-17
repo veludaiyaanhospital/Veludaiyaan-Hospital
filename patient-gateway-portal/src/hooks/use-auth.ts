@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { authService } from "@/lib/api";
+import { hasRemoteGateway } from "@/lib/api/client";
 import { DEFAULT_PROTECTED_ROUTE } from "@/lib/auth/paths";
 import type { OtpRequestPayload, OtpVerifyPayload } from "@/lib/types";
 import { useAuthStore } from "@/store/auth-store";
@@ -30,7 +31,11 @@ export function useOtpAuth() {
         mobile: variables.mobile,
         requestedAt: new Date().toISOString(),
       });
-      toast.success(`OTP sent to ${data.maskedMobile}. Use 123456 for demo login.`);
+      toast.success(
+        hasRemoteGateway()
+          ? `OTP sent to ${data.maskedMobile}.`
+          : `OTP sent to ${data.maskedMobile}. Use 123456 for demo login.`,
+      );
     },
     onError: (error: Error) => {
       toast.error(error.message || "Unable to send OTP now.");

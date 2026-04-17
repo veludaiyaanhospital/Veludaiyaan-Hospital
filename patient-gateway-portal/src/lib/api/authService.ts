@@ -1,6 +1,6 @@
 ﻿import type { AuthSession, OtpRequestPayload, OtpVerifyPayload } from "@/lib/types";
 
-import { withMockLatency } from "./client";
+import { fetchGateway, hasRemoteGateway, withMockLatency } from "./client";
 
 interface OtpRequestResult {
   requestId: string;
@@ -16,6 +16,13 @@ let activeSession: AuthSession | null = null;
 
 export const authService = {
   async requestOtp(payload: OtpRequestPayload): Promise<OtpRequestResult> {
+    if (hasRemoteGateway()) {
+      return fetchGateway<OtpRequestResult>("/auth/request-otp", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    }
+
     return (
       await withMockLatency(() => {
         if (!/^\d{10}$/.test(payload.mobile)) {
@@ -34,6 +41,13 @@ export const authService = {
   },
 
   async verifyOtp(payload: OtpVerifyPayload): Promise<AuthSession> {
+    if (hasRemoteGateway()) {
+      return fetchGateway<AuthSession>("/auth/verify-otp", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    }
+
     return (
       await withMockLatency(() => {
         const validMobile = /^\d{10}$/.test(payload.mobile);
@@ -60,6 +74,13 @@ export const authService = {
   },
 
   async refreshSession(refreshToken: string): Promise<AuthSession> {
+    if (hasRemoteGateway()) {
+      return fetchGateway<AuthSession>("/auth/refresh", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+      });
+    }
+
     return (
       await withMockLatency(() => {
         if (!activeSession || activeSession.refreshToken !== refreshToken) {
@@ -78,6 +99,13 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
+    if (hasRemoteGateway()) {
+      await fetchGateway<void>("/auth/logout", {
+        method: "POST",
+      });
+      return;
+    }
+
     await withMockLatency(
       () => {
         activeSession = null;

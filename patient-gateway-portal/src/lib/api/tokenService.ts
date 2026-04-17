@@ -1,7 +1,7 @@
 ﻿import { mockTokenStatus } from "@/lib/mock/patient-data";
 import type { TokenStage, TokenStatus } from "@/lib/types";
 
-import { withMockLatency } from "./client";
+import { fetchGateway, hasRemoteGateway, withMockLatency } from "./client";
 
 let mutableTokenStatus: TokenStatus = structuredClone(mockTokenStatus);
 
@@ -13,6 +13,10 @@ function stageFromPosition(position: number): TokenStage {
 
 export const tokenService = {
   async getTokenStatus(): Promise<TokenStatus> {
+    if (hasRemoteGateway()) {
+      return fetchGateway<TokenStatus>("/patient/token-status");
+    }
+
     return (
       await withMockLatency(() => {
         const movement = Math.random() > 0.55 ? 1 : 0;
