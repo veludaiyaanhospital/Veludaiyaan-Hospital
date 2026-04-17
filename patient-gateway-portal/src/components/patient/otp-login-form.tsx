@@ -114,9 +114,6 @@ export function OtpLoginForm() {
               <Smartphone className="h-4 w-4" />
               {requestOtpMutation.isPending ? "Sending OTP..." : "Request OTP"}
             </Button>
-            <p className="text-center text-sm text-slate-600">
-              New patient? <Link className="font-semibold text-sky-700" href="/patient/register">Create access</Link>
-            </p>
           </form>
         ) : (
           <form className="space-y-5" onSubmit={onVerifyOtp}>
