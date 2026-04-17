@@ -96,6 +96,7 @@ npm start
 - Force HTTPS
 - Restrict HMS access so only the bridge can reach it
 - Add request logging, rate limiting, and WAF rules before go-live
+- Use `PUBLIC_PATIENT_PORTAL_DEPLOYMENT.md` for the public internet setup
 
 ## Important note
 

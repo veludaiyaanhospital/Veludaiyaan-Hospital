@@ -7,6 +7,7 @@ export interface GatewaySession {
   refreshToken: string;
   patientId: string;
   expiresAt: string;
+  refreshExpiresAt: string;
   role: string;
 }
 
@@ -41,13 +42,13 @@ export function unsealSession(value: string): GatewaySession | null {
   }
 }
 
-export function buildSessionCookie(expiresAt: string) {
+export function buildSessionCookie(refreshExpiresAt: string) {
   return {
     httpOnly: true,
     secure: isProduction(),
     sameSite: "lax" as const,
     domain: config.sessionCookieDomain,
     path: "/",
-    expires: new Date(expiresAt),
+    expires: new Date(refreshExpiresAt),
   };
 }

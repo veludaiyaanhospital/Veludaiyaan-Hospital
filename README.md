@@ -28,6 +28,7 @@ This repository contains two projects:
 ## Secure HMS Integration
 
 - Architecture guide: `SECURE_HMS_INTEGRATION.md`
+- Public internet deployment: `PUBLIC_PATIENT_PORTAL_DEPLOYMENT.md`
 - Secure backend bridge: `patient-gateway-bridge/`
 - Frontend can call the bridge when `NEXT_PUBLIC_PATIENT_GATEWAY_API_BASE_URL` is configured
 

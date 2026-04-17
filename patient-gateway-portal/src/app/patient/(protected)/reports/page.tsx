@@ -83,7 +83,13 @@ export default function ReportsPage() {
           {filtered.map((report) => (
             <ReportCard
               key={report.id}
-              onDownload={() => toast.success("Report download API will be connected from HMS")}
+              onDownload={(item) => {
+                if (!item.fileUrl) {
+                  toast.error("Report file is not available right now.");
+                  return;
+                }
+                window.open(item.fileUrl, "_blank", "noopener,noreferrer");
+              }}
               onView={setSelectedReport}
               report={report}
             />
