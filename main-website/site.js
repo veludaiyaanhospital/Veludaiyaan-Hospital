@@ -7,6 +7,7 @@ const WHATSAPP_LINK = WHATSAPP_BASE + encodeURIComponent(WHATSAPP_MESSAGE);
 const EMERGENCY_TEL = "tel:+917845927606";
 const PATIENT_GATEWAY_PATH = "/patient/login";
 const PATIENT_GATEWAY_LOCAL = "http://localhost:3000/patient/login";
+const PATIENT_GATEWAY_VISIBLE = false;
 const FLOATING_CHATBOT_ICON = "images/robot-chat-icon.jpg";
 
 const THEME_LABELS = {
@@ -539,6 +540,15 @@ function wireQuickLinks() {
 }
 
 function wirePatientGatewayLinks() {
+  if (!PATIENT_GATEWAY_VISIBLE) {
+    document.querySelectorAll("a[data-patient-gateway]").forEach((el) => {
+      el.setAttribute("hidden", "");
+      el.setAttribute("aria-hidden", "true");
+      el.classList.add("hidden");
+    });
+    return;
+  }
+
   const useLocalGateway =
     window.location.protocol === "file:" ||
     window.location.hostname === "localhost" ||
