@@ -91,6 +91,7 @@ const APPOINTMENT_CHAT_CONFIG = {
   resetAfterSuccessfulHandoff: false,
   doctors: [
     { id: "dr-senthil-s", en: "Dr. Senthil S" },
+    { id: "dr-ponnappan-l", en: "Dr. Ponnappan L" },
     { id: "dr-anbarasan-k", en: "Dr. Anbarasan K" },
     { id: "dr-rajesh-m", en: "Dr. Rajesh M" },
     { id: "dr-jayakar", en: "Dr. Jayakar" },
